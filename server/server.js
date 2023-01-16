@@ -2605,7 +2605,7 @@ function loadMap(mapname) {
                             layer2: false,
                             collides: true,
                             destructible: true,
-                            health: 100,
+                            health: 1,
                             playerclip: false,
                         };
                         break;
