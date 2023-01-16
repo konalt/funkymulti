@@ -2466,6 +2466,15 @@ function getWeaponData(wt) {
     return gameState.weaponData[wt];
 }
 
+function rsize(inf, n) {
+    var ns = inf.split(",").map(parseInt);
+    if (n >= ns[0] && n <= ns[2]) {
+        console.log("Resized!");
+        return ns[1];
+    }
+    return n;
+}
+
 function loadMap(mapname) {
     try {
         var data = fs.readFileSync("./maps/" + mapname + ".map").toString();
@@ -2473,7 +2482,12 @@ function loadMap(mapname) {
         function bParse(str) {
             if (str.startsWith("$")) {
                 return vars[str.substring(1)] ? vars[str.substring(1)] : 0;
-            } else return parseInt(str) ? parseInt(str) : str;
+            } else
+                return parseInt(str)
+                    ? vars["__RECT_SIZER_INFO"]
+                        ? rsize(vars["__RECT_SIZER_INFO"], parseInt(str))
+                        : parseInt(str)
+                    : str;
         }
         var map = {
             name: "unknown",
@@ -2506,7 +2520,6 @@ function loadMap(mapname) {
                 .join(" ")
                 .split(" ")
                 .map((w) => bParse(w)); // we do this to accomodate variables with spaces
-            console.log(lineData);
             var layer2 = false;
             var collides = false;
             var destructible = false;
