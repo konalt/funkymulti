@@ -5,8 +5,8 @@ const https = require("https");
 const sio = require("socket.io");
 const express = require("express");
 const flaps = require("./plugins/flaps");
-const {debuglog} = require("util");
-const {strict} = require("assert");
+const { debuglog } = require("util");
+const { strict } = require("assert");
 
 // HTTPS certificates
 const options = {
@@ -881,14 +881,14 @@ function tick() {
                     (ply.isReloading ? 0.75 : 1) *
                     (getWeaponData(ply.weapon)
                         ? getWeaponData(ply.weapon)
-                        : {moveMult: 1}
+                        : { moveMult: 1 }
                     ).moveMult;
                 if (!isSafePos(ply)) {
                     var isSafe = false;
                     var sx = ply.x;
                     while (!isSafe) {
                         sx += -vector[0];
-                        isSafe = isSafePos({x: sx, y: ply.y});
+                        isSafe = isSafePos({ x: sx, y: ply.y });
                     }
                     ply.x = sx;
                 }
@@ -903,7 +903,7 @@ function tick() {
                     var sy = ply.y;
                     while (!isSafe) {
                         sy += -vector[1];
-                        isSafe = isSafePos({x: ply.x, y: sy});
+                        isSafe = isSafePos({ x: ply.x, y: sy });
                     }
                     ply.y = sy;
                 }
@@ -934,7 +934,10 @@ function tick() {
                             var sx = bullet.x;
                             while (!isSafe) {
                                 sx -= bullet.dx;
-                                isSafe = isSafeBulletPos({x: sx, y: bullet.y});
+                                isSafe = isSafeBulletPos({
+                                    x: sx,
+                                    y: bullet.y,
+                                });
                             }
                             bullet.x = sx;
                             bullet.dx = -bullet.dx;
@@ -950,7 +953,10 @@ function tick() {
                             var sy = bullet.y;
                             while (!isSafe) {
                                 sy -= bullet.dy;
-                                isSafe = isSafeBulletPos({x: bullet.x, y: sy});
+                                isSafe = isSafeBulletPos({
+                                    x: bullet.x,
+                                    y: sy,
+                                });
                             }
                             bullet.y = sy;
                             bullet.dy = -bullet.dy;
@@ -1018,7 +1024,7 @@ function tick() {
                         bullet.x -= bullet.dx * 0.5;
                         bullet.y -= bullet.dy * 0.5;
                         isSafe =
-                            isSafeBulletPos({x: bullet.x, y: bullet.y}) ||
+                            isSafeBulletPos({ x: bullet.x, y: bullet.y }) ||
                             t > 10000;
                         t++;
                     }
@@ -1123,7 +1129,7 @@ function tick() {
                     var sx = grenade.x;
                     while (!isSafe) {
                         sx -= vector[0];
-                        isSafe = isSafeGrenadePos({x: sx, y: grenade.y});
+                        isSafe = isSafeGrenadePos({ x: sx, y: grenade.y });
                     }
                     grenade.x = sx;
                     grenade.dx = -vector[0];
@@ -1138,7 +1144,7 @@ function tick() {
                     var sy = grenade.y;
                     while (!isSafe) {
                         sy += -vector[1];
-                        isSafe = isSafeGrenadePos({x: grenade.x, y: sy});
+                        isSafe = isSafeGrenadePos({ x: grenade.x, y: sy });
                     }
                     grenade.y = sy;
                     grenade.dy = -vector[1];
@@ -1279,7 +1285,7 @@ function tick() {
                     var sx = grenade.x;
                     while (!isSafe) {
                         sx -= vector[0];
-                        isSafe = isSafeGrenadePos({x: sx, y: grenade.y});
+                        isSafe = isSafeGrenadePos({ x: sx, y: grenade.y });
                     }
                     grenade.x = sx;
                     grenade.dx = -vector[0];
@@ -1306,7 +1312,7 @@ function tick() {
                     var sy = grenade.y;
                     while (!isSafe) {
                         sy += -vector[1];
-                        isSafe = isSafeGrenadePos({x: grenade.x, y: sy});
+                        isSafe = isSafeGrenadePos({ x: grenade.x, y: sy });
                     }
                     grenade.y = sy;
                     grenade.dy = -vector[1];
@@ -1332,7 +1338,7 @@ function tick() {
                 var sx = flame.x;
                 while (!st) {
                     sx += -flame.dx;
-                    st = isSafeBulletPos({x: sx, y: flame.y});
+                    st = isSafeBulletPos({ x: sx, y: flame.y });
                 }
                 grenade.x = sx;
                 grenade.dx = 0;
@@ -1344,7 +1350,7 @@ function tick() {
                 var sy = flame.y;
                 while (!st) {
                     sy += -flame.dy;
-                    st = isSafeBulletPos({x: flame.x, y: sy});
+                    st = isSafeBulletPos({ x: flame.x, y: sy });
                 }
                 grenade.y = sy;
                 grenade.dy = 0;
@@ -1390,8 +1396,8 @@ function isSafePos(ply) {
         if (!ret) return;
         switch (obj.type) {
             case "rect":
-                var rectA = {x: ply.x - 30, y: ply.y - 30, w: 60, h: 60};
-                var rectB = {x: obj.x1, y: obj.y1, w: obj.x2, h: obj.y2};
+                var rectA = { x: ply.x - 30, y: ply.y - 30, w: 60, h: 60 };
+                var rectB = { x: obj.x1, y: obj.y1, w: obj.x2, h: obj.y2 };
                 var xOverlap =
                     valueInRange(rectA.x, rectB.x, rectB.x + rectB.w) ||
                     valueInRange(rectB.x, rectA.x, rectA.x + rectA.w);
@@ -1401,7 +1407,7 @@ function isSafePos(ply) {
                 ret = !(yOverlap && xOverlap);
                 break;
             case "circ":
-                var rectA = {x: ply.x - 30, y: ply.y - 30, w: 60, h: 60};
+                var rectA = { x: ply.x - 30, y: ply.y - 30, w: 60, h: 60 };
                 var rectB = {
                     x: obj.x1 - obj.r,
                     y: obj.y1 - obj.r,
@@ -1431,8 +1437,8 @@ function isSafeBulletPos(ply) {
         if (!ret || obj.playerclip) return;
         switch (obj.type) {
             case "rect":
-                var rectA = {x: ply.x - 1, y: ply.y - 1, w: 2, h: 2};
-                var rectB = {x: obj.x1, y: obj.y1, w: obj.x2, h: obj.y2};
+                var rectA = { x: ply.x - 1, y: ply.y - 1, w: 2, h: 2 };
+                var rectB = { x: obj.x1, y: obj.y1, w: obj.x2, h: obj.y2 };
                 var xOverlap =
                     valueInRange(rectA.x, rectB.x, rectB.x + rectB.w) ||
                     valueInRange(rectB.x, rectA.x, rectA.x + rectA.w);
@@ -1459,8 +1465,8 @@ function isSafeGrenadePos(ply) {
         if (!ret || obj.playerclip) return;
         switch (obj.type) {
             case "rect":
-                var rectA = {x: ply.x - 5, y: ply.y - 5, w: 10, h: 10};
-                var rectB = {x: obj.x1, y: obj.y1, w: obj.x2, h: obj.y2};
+                var rectA = { x: ply.x - 5, y: ply.y - 5, w: 10, h: 10 };
+                var rectB = { x: obj.x1, y: obj.y1, w: obj.x2, h: obj.y2 };
                 var xOverlap =
                     valueInRange(rectA.x, rectB.x, rectB.x + rectB.w) ||
                     valueInRange(rectB.x, rectA.x, rectA.x + rectA.w);
@@ -1470,7 +1476,7 @@ function isSafeGrenadePos(ply) {
                 ret = !(yOverlap && xOverlap);
                 break;
             case "circ":
-                var rectA = {x: ply.x - 5, y: ply.y - 5, w: 10, h: 10};
+                var rectA = { x: ply.x - 5, y: ply.y - 5, w: 10, h: 10 };
                 var rectB = {
                     x: obj.x1 - obj.r,
                     y: obj.y1 - obj.r,
@@ -1496,8 +1502,8 @@ function getCollidedObject(ply) {
         if (ret) return;
         switch (obj.type) {
             case "rect":
-                var rectA = {x: ply.x - 1, y: ply.y - 1, w: 2, h: 2};
-                var rectB = {x: obj.x1, y: obj.y1, w: obj.x2, h: obj.y2};
+                var rectA = { x: ply.x - 1, y: ply.y - 1, w: 2, h: 2 };
+                var rectB = { x: obj.x1, y: obj.y1, w: obj.x2, h: obj.y2 };
                 var xOverlap =
                     valueInRange(rectA.x, rectB.x, rectB.x + rectB.w) ||
                     valueInRange(rectB.x, rectA.x, rectA.x + rectA.w);
@@ -1506,7 +1512,7 @@ function getCollidedObject(ply) {
                     valueInRange(rectB.y, rectA.y, rectA.y + rectA.h);
                 if (yOverlap && xOverlap) ret = obj;
             case "circ":
-                var rectA = {x: ply.x - 1, y: ply.y - 1, w: 2, h: 2};
+                var rectA = { x: ply.x - 1, y: ply.y - 1, w: 2, h: 2 };
                 var rectB = {
                     x: obj.x1 - obj.r,
                     y: obj.y1 - obj.r,
@@ -1641,7 +1647,7 @@ function checkShit(md, barrelLength) {
                 ret = false;
                 done = true;
             }
-            if (!isSafeBulletPos({x: cx, y: cy})) {
+            if (!isSafeBulletPos({ x: cx, y: cy })) {
                 if (aimingDebug) spawnDebugParticle(cx, cy, "255,0,255");
                 ret = true;
                 done = true;
@@ -1685,7 +1691,7 @@ function melee(md, owner) {
                 ret = false;
                 done = true;
             }
-            var p = bulletPlayerCheck({x: cx, y: cy, owner: owner[0]}, true);
+            var p = bulletPlayerCheck({ x: cx, y: cy, owner: owner[0] }, true);
             if (p) {
                 if (aimingDebug) spawnDebugParticle(cx, cy, "255,0,255");
                 ret = p;
@@ -2454,7 +2460,7 @@ var enableInfiniteAmmoGlitch = false;
 
 function getWeaponData(wt) {
     if (wt == 100) {
-        return {dmg: 10, name: "GrenadeBullet", draw: () => {}};
+        return { dmg: 10, name: "GrenadeBullet", draw: () => {} };
     }
     return gameState.weaponData[wt];
 }
@@ -3176,7 +3182,7 @@ function doBotAI(bot, botname) {
 
     function botGetClosestWaypoint(cur = null, skip = []) {
         var nearest = null;
-        if (!cur) cur = {x: 9999, y: 9999, id: 9999};
+        if (!cur) cur = { x: 9999, y: 9999, id: 9999 };
         navData.waypoints.forEach((wpt) => {
             if (botHasVisitedWpt(wpt, skip)) return;
             if (
@@ -3204,7 +3210,7 @@ function doBotAI(bot, botname) {
 
     function botGetFurthestWaypoint(cur = null, skip = []) {
         var nearest = null;
-        if (!cur) cur = {x: 9999, y: 9999, id: 9999};
+        if (!cur) cur = { x: 9999, y: 9999, id: 9999 };
         navData.waypoints.forEach((wpt) => {
             if (botHasVisitedWpt(wpt, skip)) return;
             if (!nearest) {
@@ -3579,7 +3585,7 @@ function navAutoGetWaypoints(map, steps) {
         for (let ym = 0; ym < steps; ym++) {
             var x = (map.width / steps) * xm;
             var y = (map.height / steps) * ym;
-            if (!isSafePos({x: x, y: y})) continue;
+            if (!isSafePos({ x: x, y: y })) continue;
             o.push({
                 id: clone(i),
                 x: x,

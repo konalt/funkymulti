@@ -93,9 +93,9 @@ function refH() {
 // modified version of https://stackoverfsdlow.com/a/3368118
 function roundRect(x, y, w, h, radius, col, ctx = _ctxref) {
     if (typeof radius === "number") {
-        radius = {tl: radius, tr: radius, br: radius, bl: radius};
+        radius = { tl: radius, tr: radius, br: radius, bl: radius };
     } else {
-        radius = {...{tl: 0, tr: 0, br: 0, bl: 0}, ...radius};
+        radius = { ...{ tl: 0, tr: 0, br: 0, bl: 0 }, ...radius };
     }
     ctx.fillStyle = col;
     ctx.beginPath();
@@ -114,9 +114,9 @@ function roundRect(x, y, w, h, radius, col, ctx = _ctxref) {
 
 function strokeRoundRect(x, y, w, h, radius, thickness, col, ctx = _ctxref) {
     if (typeof radius === "number") {
-        radius = {tl: radius, tr: radius, br: radius, bl: radius};
+        radius = { tl: radius, tr: radius, br: radius, bl: radius };
     } else {
-        radius = {...{tl: 0, tr: 0, br: 0, bl: 0}, ...radius};
+        radius = { ...{ tl: 0, tr: 0, br: 0, bl: 0 }, ...radius };
     }
     ctx.strokeStyle = col;
     ctx.lineWidth = thickness;
@@ -335,8 +335,8 @@ function isCovered(ply) {
         if (!obj.layer2 || ret) return;
         switch (obj.type) {
             case "rect":
-                var rectA = {x: ply.x - 0.5, y: ply.y - 0.5, w: 1, h: 1};
-                var rectB = {x: obj.x1, y: obj.y1, w: obj.x2, h: obj.y2};
+                var rectA = { x: ply.x - 0.5, y: ply.y - 0.5, w: 1, h: 1 };
+                var rectB = { x: obj.x1, y: obj.y1, w: obj.x2, h: obj.y2 };
                 var xOverlap =
                     valueInRange(rectA.x, rectB.x, rectB.x + rectB.w) ||
                     valueInRange(rectB.x, rectA.x, rectA.x + rectA.w);
@@ -346,7 +346,7 @@ function isCovered(ply) {
                 ret = xOverlap && yOverlap;
                 break;
             case "circ":
-                var rectA = {x: ply.x - 0.5, y: ply.y - 0.5, w: 1, h: 1};
+                var rectA = { x: ply.x - 0.5, y: ply.y - 0.5, w: 1, h: 1 };
                 var rectB = {
                     x: obj.x1 - obj.r,
                     y: obj.y1 - obj.r,
@@ -927,7 +927,7 @@ function getMousePos(canvas, evt) {
     };
 }
 
-var netInfoMachineReadable = {ping: 0};
+var netInfoMachineReadable = { ping: 0 };
 var showNetInfo = false;
 var lastFpsTime = Date.now();
 var fps = 0;
@@ -935,7 +935,7 @@ var optimizedDivisionSteps = 10;
 
 socket.on("gs", (data) => {
     localPlayerName = socket.id;
-    var newData = {...data};
+    var newData = { ...data };
     var newGeo = [];
     newData.map.geo.forEach((obj) => {
         if (
@@ -948,7 +948,7 @@ socket.on("gs", (data) => {
             for (let x = 0; x < optimizedDivisionSteps; x++) {
                 for (let y = 0; y < optimizedDivisionSteps; y++) {
                     var newObj = Object.assign(
-                        {...obj},
+                        { ...obj },
                         {
                             x1: obj.x1 + x * (obj.x2 / optimizedDivisionSteps),
                             y1: obj.y1 + y * (obj.y2 / optimizedDivisionSteps),
@@ -1803,7 +1803,7 @@ function shouldDraw(obj) {
                 w: 1633,
                 h: 919,
             };
-            var rectB = {x: obj.x1, y: obj.y1, w: obj.x2, h: obj.y2};
+            var rectB = { x: obj.x1, y: obj.y1, w: obj.x2, h: obj.y2 };
             var xOverlap =
                 valueInRange(rectA.x, rectB.x, rectB.x + rectB.w) ||
                 valueInRange(rectB.x, rectA.x, rectA.x + rectA.w);
@@ -1818,7 +1818,7 @@ function shouldDraw(obj) {
                 w: 1633,
                 h: 919,
             };
-            var rectB = {x: obj.x1, y: obj.y1, w: obj.x2, h: obj.y2};
+            var rectB = { x: obj.x1, y: obj.y1, w: obj.x2, h: obj.y2 };
             var xOverlap =
                 valueInRange(rectA.x, rectB.x, rectB.x + rectB.w) ||
                 valueInRange(rectB.x, rectA.x, rectA.x + rectA.w);
@@ -2771,8 +2771,8 @@ function highlighted(ply) {
         if (c) return;
         switch (obj.type) {
             case "rect":
-                var rectA = {x: ply.x - 0.5, y: ply.y - 0.5, w: 1, h: 1};
-                var rectB = {x: obj.x1, y: obj.y1, w: obj.x2, h: obj.y2};
+                var rectA = { x: ply.x - 0.5, y: ply.y - 0.5, w: 1, h: 1 };
+                var rectB = { x: obj.x1, y: obj.y1, w: obj.x2, h: obj.y2 };
                 var xOverlap =
                     valueInRange(rectA.x, rectB.x, rectB.x + rectB.w) ||
                     valueInRange(rectB.x, rectA.x, rectA.x + rectA.w);
@@ -2783,7 +2783,7 @@ function highlighted(ply) {
                 c = xOverlap && yOverlap;
                 break;
             case "circ":
-                var rectA = {x: ply.x - 0.5, y: ply.y - 0.5, w: 1, h: 1};
+                var rectA = { x: ply.x - 0.5, y: ply.y - 0.5, w: 1, h: 1 };
                 var rectB = {
                     x: obj.x1 - obj.r,
                     y: obj.y1 - obj.r,
