@@ -452,6 +452,9 @@ function draw() {
                 if (getKeyDown("keyr") && !messagemode) {
                     socket.emit("reload_gun");
                 }
+                if (getKeyDown("keyy") && !messagemode) {
+                    socket.emit("map_reload");
+                }
                 if (
                     getKeyDown("keyt") &&
                     !messagemode &&
