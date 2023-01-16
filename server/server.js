@@ -1499,7 +1499,7 @@ function isSafeGrenadePos(ply) {
 function getCollidedObject(ply) {
     var ret = null;
     gameState.map.colliding.forEach((obj) => {
-        if (ret) return;
+        if (ret || obj.playerclip) return;
         switch (obj.type) {
             case "rect":
                 var rectA = { x: ply.x - 1, y: ply.y - 1, w: 2, h: 2 };
@@ -2483,7 +2483,7 @@ function loadMap(mapname) {
             if (str.startsWith("$")) {
                 return vars[str.substring(1)] ? vars[str.substring(1)] : 0;
             } else
-                return parseInt(str)
+                return parseInt(str).toString() == str
                     ? vars["__RECT_SIZER_INFO"]
                         ? rsize(vars["__RECT_SIZER_INFO"], parseInt(str))
                         : parseInt(str)
@@ -2520,6 +2520,7 @@ function loadMap(mapname) {
                 .join(" ")
                 .split(" ")
                 .map((w) => bParse(w)); // we do this to accomodate variables with spaces
+            console.log(lineData);
             var layer2 = false;
             var collides = false;
             var destructible = false;
@@ -2541,6 +2542,7 @@ function loadMap(mapname) {
                 lineData[0] = lineData[0].substring("destroy-".length);
             }
             var obj;
+            var obj2;
             if (lineData[0] == "name") {
                 map.name = lineData[1];
             } else if (lineData[0] == "background") {
@@ -2600,9 +2602,46 @@ function loadMap(mapname) {
                     case "window":
                         var vertical = lineData[5] == "v";
                         var walled = false;
-                        var thickness = 15;
+                        var thickness = 12;
                         collides = true;
                         destructible = true;
+                        obj = {
+                            type: "rect",
+                            x1:
+                                (vertical ? thickness / 2 - 1 : 0) +
+                                lineData[2],
+                            y1:
+                                (vertical ? 0 : thickness / 2 - 1) +
+                                lineData[3],
+                            x2: vertical ? thickness : lineData[4],
+                            y2: vertical ? lineData[4] : thickness,
+                            col: "rgba(131, 220, 252, 0.5)",
+                            geoId: "Window" + num,
+                            layer2: false,
+                            collides: true,
+                            destructible: true,
+                            health: 1,
+                            playerclip: false,
+                        };
+                        obj2 = {
+                            type: "rect",
+                            x1: lineData[2],
+                            y1: lineData[3],
+                            x2: vertical ? 22 : lineData[4],
+                            y2: vertical ? lineData[4] : 22,
+                            col: vars["wdark"],
+                            geoId: "Door" + num,
+                            layer2: false,
+                            collides: false,
+                            destructible: false,
+                            health: 100,
+                            playerclip: true,
+                        };
+                        break;
+                    case "door":
+                        var vertical = lineData[5] == "v";
+                        var thickness = 15;
+                        collides = true;
                         obj = {
                             type: "rect",
                             x1:
@@ -2613,12 +2652,12 @@ function loadMap(mapname) {
                                 lineData[3],
                             x2: vertical ? thickness : lineData[4],
                             y2: vertical ? lineData[4] : thickness,
-                            col: "rgba(131, 220, 252, 0.5)",
-                            geoId: "Window" + num,
+                            col: "#8c4100",
+                            geoId: "Door" + num,
                             layer2: false,
                             collides: true,
-                            destructible: true,
-                            health: 1,
+                            destructible: false,
+                            health: 100,
                             playerclip: false,
                         };
                         break;
@@ -2759,6 +2798,10 @@ function loadMap(mapname) {
                         " at line " +
                         num
                 );
+            }
+            if (obj2) {
+                map.geo.push(obj2);
+                if (obj2.collides || obj2.playerclip) map.colliding.push(obj2);
             }
             if (obj) {
                 map.geo.push(obj);
