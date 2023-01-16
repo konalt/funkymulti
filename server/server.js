@@ -1511,6 +1511,7 @@ function getCollidedObject(ply) {
                     valueInRange(rectA.y, rectB.y, rectB.y + rectB.h) ||
                     valueInRange(rectB.y, rectA.y, rectA.y + rectA.h);
                 if (yOverlap && xOverlap) ret = obj;
+                break;
             case "circ":
                 var rectA = { x: ply.x - 1, y: ply.y - 1, w: 2, h: 2 };
                 var rectB = {
@@ -1525,7 +1526,7 @@ function getCollidedObject(ply) {
                 var yOverlap =
                     valueInRange(rectA.y, rectB.y, rectB.y + rectB.h) ||
                     valueInRange(rectB.y, rectA.y, rectA.y + rectA.h);
-                ret = !(yOverlap && xOverlap);
+                if (!(yOverlap && xOverlap)) ret = obj;
         }
     });
     return ret;
@@ -2585,16 +2586,25 @@ function loadMap(mapname) {
                         break;
                     case "window":
                         var vertical = lineData[5] == "v";
+                        var walled = false;
+                        var thickness = 15;
+                        collides = true;
+                        destructible = true;
                         obj = {
                             type: "rect",
-                            x1: lineData[2],
-                            y1: lineData[3],
-                            x2: vertical ? 22 : lineData[4],
-                            y2: vertical ? lineData[4] : 22,
+                            x1:
+                                (vertical ? thickness - 22 / 2 : 0) +
+                                lineData[2],
+                            y1:
+                                (vertical ? 0 : thickness - 22 / 2) +
+                                lineData[3],
+                            x2: vertical ? thickness : lineData[4],
+                            y2: vertical ? lineData[4] : thickness,
                             col: "rgba(131, 220, 252, 0.5)",
                             geoId: "Window" + num,
                             layer2: false,
-                            collides: false,
+                            collides: true,
+                            destructible: true,
                             health: 100,
                             playerclip: false,
                         };
