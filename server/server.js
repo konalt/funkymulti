@@ -2101,8 +2101,8 @@ io.on("connection", (socket) => {
         }
     });
     socket.on("map_reload", () => {
-        gameState.map = loadMap(gameState.map.name);
-        socket.emit("gs", gameState);
+        gameState.map = loadMap(maplist[mapIndex]);
+        io.emit("gs", gameState);
     });
     socket.on("spawn_ai", () => {
         if (gameIsEnding) return;
@@ -2501,6 +2501,11 @@ function loadMap(mapname) {
             var lineData = line.split(" ");
             if (lineData[0].startsWith("--")) return;
             lineData = lineData.map((w) => bParse(w));
+            lineData = lineData
+                .join(" ")
+                .split(" ")
+                .map((w) => bParse(w)); // we do this to accomodate variables with spaces
+            console.log(lineData);
             var layer2 = false;
             var collides = false;
             var destructible = false;
@@ -2572,6 +2577,22 @@ function loadMap(mapname) {
                             col: "black",
                             thickness: 4,
                             geoId: "x",
+                            layer2: false,
+                            collides: false,
+                            health: 100,
+                            playerclip: false,
+                        };
+                        break;
+                    case "window":
+                        var vertical = lineData[5] == "v";
+                        obj = {
+                            type: "rect",
+                            x1: lineData[2],
+                            y1: lineData[3],
+                            x2: vertical ? 22 : lineData[4],
+                            y2: vertical ? lineData[4] : 22,
+                            col: "rgba(131, 220, 252, 0.5)",
+                            geoId: "Window" + num,
                             layer2: false,
                             collides: false,
                             health: 100,
