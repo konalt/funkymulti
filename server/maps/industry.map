@@ -1,0 +1,49 @@
+name industry
+width 1633
+height 919
+camera 1
+bglayer2 1
+background #808080
+outofbounds #4b0305
+--Walls and shit
+layer2-collides-rect 717 32 171 78 #404040
+layer2-collides-rect 717 250 171 458 #404040
+layer2-collides-rect 374 356 85 48 #404040
+layer2-collides-rect 449 356 1002 177 #404040
+layer2-collides-rect 1256 613 69 241 #404040
+layer2-collides-rect 717 870 171 40 #404040
+layer2-rect 0 887 1633 32 #6b2315
+layer2-collides-rect 32 356 240 178 #404040
+layer2-collides-rect 262 486 85 48 #404040
+layer2-collides-rect 512 636 44 270 #404040
+layer2-collides-rect 1567 356 34 177 #404040
+layer2-collides-rect 1255 29 38 159 #404040
+layer2-collides-rect 1458 149 146 38 #404040
+--How stylish!
+layer2-strokerect 717 356 171 177 black 5
+--Door glass roof thingy
+layer2-rect 717 108 20 142 #606060
+layer2-rect 717 108 171 20 #606060
+layer2-rect 868 108 20 142 #606060
+layer2-rect 717 230 171 20 #606060
+layer2-rect 737 128 131 102 rgba(128,128,255,0.4)
+--Entities
+spawnpoint 100 100
+spawnpoint 1533 819
+spawnpoint 100 819
+spawnpoint 1533 100
+--roof thing
+layer2-rect 717 356 171 177 #858585 #IndoorRoofInner1
+layer2-rect 760 400 86 89 #616161 #IndoorRoofInner2
+layer2-strokerect 717 356 171 177 black 5 #IndoorRoofInner1
+layer2-strokerect 760 400 86 89 black 5 #IndoorRoofInner2
+layer2-strokerect 717 356 171 177 black 5 #IndoorRoofOuter
+layer2-line 717 356 888 533 black 5 #IndoorRoofLine1
+layer2-line 888 356 717 533 black 5 #IndoorRoofLine2
+layer2-rect 790 432 25 25 #858585 #IndoorRoofInner2
+layer2-strokerect 790 432 25 25 black 5 #IndoorRoofInner2
+--Border
+layer2-collides-rect 0 0 32 919 #6b2315
+layer2-collides-rect 0 0 1633 32 #6b2315
+layer2-collides-rect 0 887 1633 32 #6b2315
+layer2-collides-rect 1601 0 32 919 #6b2315

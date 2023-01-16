@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en" class="w-full h-screen">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>FunkyMulti Blueprint</title>
+        <link rel="stylesheet" href="dist.css" />
+        <script src="painter.js" defer></script>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    </head>
+    <body class="w-full h-full select-none overflow-hidden">
+        <div class="flex flex-col h-full">
+            <div
+                class="w-full h-16 bg-neutral-700 flex flex-row p-2 justify-start items-center gap-2"
+            >
+                <div
+                    class="flex flex-row items-center justify-center w-max h-full gap-2 border-r p-1 pr-2 border-neutral-400 select-none"
+                >
+                    <h1 class="text-white text-3xl h-min font-semibold">
+                        FunkyMulti
+                        <span
+                            class="font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-400"
+                            >Blueprint</span
+                        >
+                    </h1>
+                </div>
+            </div>
+            <div class="flex flex-row items-center flex-1 w-full">
+                <div
+                    class="justify-self-start h-full bg-neutral-800 flex flex-row"
+                    style="width: 288px"
+                    id="leftpanel"
+                >
+                    <div
+                        class="flex-1 p-1 pl-2 text-white flex text-center items-center flex-col"
+                    >
+                        <h1 class="text-2xl font-bold">Tools</h1>
+                        <br />
+                        <input
+                            class="bg-neutral-700 rounded-lg p-2"
+                            type="text"
+                            id="input_mapname"
+                            placeholder="Map Name"
+                            autocomplete="off"
+                        />
+                    </div>
+                    <div
+                        class="w-2 cursor-ew-resize h-full justify-self-end -mr-1"
+                        id="dragleft"
+                    ></div>
+                </div>
+                <div class="bg-red-600 flex-1 h-full">
+                    <!-- Canvas -->
+                    <canvas
+                        id="paintercanvas"
+                        class="h-full w-full bg-black"
+                        style="border-radius: 0.01px"
+                    >
+                        Your browser does not support this element!
+                    </canvas>
+                    <!-- End Canvas -->
+                </div>
+                <div
+                    class="justify-self-end h-full bg-neutral-800 flex flex-row"
+                    style="width: 288px"
+                    id="rightpanel"
+                >
+                    <div
+                        class="w-2 cursor-ew-resize h-full justify-self-start -ml-1"
+                        id="dragright"
+                    ></div>
+                    <div class="flex-1 p-1 pr-2 text-white">Content</div>
+                </div>
+            </div>
+        </div>
+        <canvas id="truecanvas" hidden height="3200" width="3200"></canvas>
+        <canvas id="tempcanvas" hidden height="512" width="512"></canvas>
+        <script>
+            var segmentSizes = {
+                leftPanel: 288,
+                rightPanel: 288,
+            };
+            var widthBounds = {
+                panel: [250, 500],
+            };
+            function bound(n, bounds) {
+                return Math.min(Math.max(n, bounds[0]), bounds[1]);
+            }
+            /**
+             * @returns {HTMLElement}
+             */
+            function $$(id) {
+                return document.getElementById(id);
+            }
+            function update() {
+                segmentSizes.leftPanel = bound(
+                    segmentSizes.leftPanel,
+                    widthBounds.panel
+                );
+                segmentSizes.rightPanel = bound(
+                    segmentSizes.rightPanel,
+                    widthBounds.panel
+                );
+                $$("leftpanel").style.width = segmentSizes.leftPanel + "px";
+                $$("rightpanel").style.width = segmentSizes.rightPanel + "px";
+            }
+            /**
+             * @param event {MouseEvent}
+             */
+            function dragger(isRight, event) {
+                if (isRight) {
+                    segmentSizes.rightPanel =
+                        document.body.clientWidth - event.clientX;
+                } else {
+                    segmentSizes.leftPanel = event.clientX;
+                }
+                update();
+            }
+            var mouseDown = false;
+            var lastTarget = null;
+            document.body.addEventListener("mousedown", (e) => {
+                mouseDown = true;
+                lastTarget = e.target;
+            });
+            document.body.addEventListener("mousemove", (e) => {
+                if (mouseDown && lastTarget) {
+                    if (lastTarget.id == "dragleft") {
+                        dragger(false, e);
+                    } else if (lastTarget.id == "dragright") {
+                        dragger(true, e);
+                    }
+                }
+            });
+            document.body.addEventListener("mouseup", (e) => {
+                mouseDown = false;
+            });
+            update();
+        </script>
+    </body>
+</html>

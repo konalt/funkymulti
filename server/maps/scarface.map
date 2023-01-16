@@ -1,0 +1,80 @@
+name Scarface Mansion
+width 3266
+height 1838
+grid 0
+camera 1
+background #910e12
+outofbounds lightgray
+-- Rooms/Walls
+rect -1 -1 539 440 #ffe9b2
+rect 540 -1 354 441 #e21b21
+rect 710 441 540 1397 #971d20
+collides-rect 517 -1 32 456 #4a0000
+strokerect 517 -10 32 466 black 4
+collides-rect 217 424 300 32 #4a0000
+strokerect 217 424 300 32 black 4
+rect 507 426 21 28 #4a0000
+collides-rect 0 424 95 32 #4a0000
+strokerect -10 424 105 32 black 4
+line 96 440 216 440 black 4
+collides-rect 549 424 12 32 #4a0000
+strokerect 549 424 12 32 black 4
+rect 546 426 7 28 #4a0000
+collides-rect 683 424 58 32 #4a0000
+strokerect 683 424 58 32 black 4
+collides-rect 696 141 33 282 #4a0000
+strokerect 696 141 33 282 black 4
+rect 698 420 29 10 #4a0000
+line 561 439 684 439 black 4
+line 742 440 860 440 black 4
+collides-rect 863 424 228 32 #4a0000
+strokerect 863 424 228 32 black 4
+collides-rect 876 0 33 424 #4a0000
+strokerect 876 -10 33 434 black 4
+rect 878 415 29 20 #4a0000
+-- Bathroom
+spawnpoint 430 350
+rect 383 2 132 217 white
+strokerect 383 2 132 217 black 5
+roundrect 397 17 103 189 #c4c4c4 10
+strokeroundrect 397 17 103 189 black 5
+playerclip-rect 381 0 135 221 transparent
+roundrect -10 135 62 114 white 10
+strokeroundrect -10 135 62 114 black 5
+roundrect -10 150 49 87 #c4c4c4 10
+strokeroundrect -10 150 49 87 black 5
+line 0 191 15 191 black 5
+circ 1 181 3 #00e1ff 2
+circ 1 202 3 #ff4830 2
+playerclip-rect -10 135 62 114 transparent
+-- Stairs
+-- thank god i made entities lmao
+ent scarface_line 550 417
+ent scarface_line 550 390
+ent scarface_line 550 363
+ent scarface_line 550 336
+ent scarface_line 550 309
+ent scarface_line 550 282
+ent scarface_line 550 255
+ent scarface_line 550 228
+ent scarface_line 550 201
+ent scarface_line 550 174
+ent scarface_line 550 147
+ent scarface_line 730 417
+ent scarface_line 730 390
+ent scarface_line 730 363
+ent scarface_line 730 336
+ent scarface_line 730 309
+ent scarface_line 730 282
+ent scarface_line 730 255
+ent scarface_line 730 228
+ent scarface_line 730 201
+ent scarface_line 730 174
+ent scarface_line 730 147
+-- Invisible wall for upstairs
+line 710 457 710 1837 black 4
+playerclip-rect 709 457 3 1381 transparent
+-- Out of bounds
+outofbounds lightgray
+rect -100 -100 3466 100 lightgray
+rect -100 -100 100 2038 lightgray

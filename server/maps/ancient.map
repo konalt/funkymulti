@@ -1,0 +1,40 @@
+name ancient
+width 1633
+height 919
+camera 0
+background #7ccc8b
+-- hoo ho its me PHILIP THE FUCKING RECTANGLE
+rect 0 0 0 0 #E4EACE
+--
+collides-rect 0 0 355 52 #E4EACE
+collides-rect 617 0 414 55 #E4EACE
+collides-rect 1209 0 341 54 #E4EACE
+--
+collides-rect 681 74 308 78 #E4EACE
+collides-rect 1091 81 48 376 #E4EACE
+collides-rect 466 797 529 49 #E4EACE
+collides-rect 32 664 29 182 #E4EACE
+collides-rect 32 818 302 28 #E4EACE
+collides-rect 1552 323 34 324 #E4EACE
+--
+rect 47 65 268 385 #E4EACE
+rect 67 84 230 348 #2574db
+rect 0 0 0 0 #E4EACE
+rect 1192 74 379 202 #E4EACE
+rect 1210 93 342 165 #2574db
+rect 0 0 0 0 #E4EACE
+--
+rect 379 28 4 333 #E4EACE
+rect 379 357 648 4 #E4EACE
+rect 593 28 4 333 #E4EACE
+rect 379 28 218 4 #E4EACE
+rect 379 196 648 4 #E4EACE
+rect 871 196 4 537 #E4EACE
+rect 1023 196 4 542 #E4EACE
+rect 378 731 1117 4 #E4EACE
+rect 378 572 4 161 #E4EACE
+rect 378 572 1114 4 #E4EACE
+strokerect 1275 315 217 417 #E4EACE 5
+--
+spawnpoint 1423 371
+spawnpoint 451 138

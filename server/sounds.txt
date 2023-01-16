@@ -1,0 +1,13 @@
+ar_reload
+ar_shoot
+grenade_boom
+grenade_pin
+grenade_toss
+shotgun_reload
+shotgun_shoot
+melee_fist
+flamethrower
+revolver_shoot
+revolver_reload
+sniper_shoot
+sniper_reload

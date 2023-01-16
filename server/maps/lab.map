@@ -1,0 +1,53 @@
+name lab
+width 1633
+height 919
+camera 0
+background #808080
+--
+collides-rect 0 320 150 55 #404040 #GM_Wall_South_1
+collides-rect 240 320 250 55 #404040 #GM_Wall_South_2
+collides-rect 435 110 55 265 #404040 #GM_Wall_East_1
+--
+collides-rect 660 0 55 100 #404040
+collides-rect 660 210 55 390 #404040
+collides-rect 520 545 329 55 #404040
+--
+collides-rect 870 110 55 350 #404040
+collides-rect 870 405 560 55 #404040
+--
+rect 1030 70 450 250 #9D9D9D
+rect 1450 80 20 230 #B9B9B9
+rect 1040 80 400 230 #B9B9B9
+rect 1065 80 70 230 #D7D7D7
+rect 1160 80 70 230 #D7D7D7
+rect 1255 80 70 230 #D7D7D7
+rect 1350 80 70 230 #D7D7D7
+rect 1075 90 50 210 #8CFFED
+rect 1170 90 50 210 #8CFFED
+rect 1265 90 50 210 #8CFFED
+rect 1360 90 50 210 #8CFFED
+--
+collides-rect 0 625 55 300 #404040
+collides-rect 0 864 480 55 #404040
+collides-rect 55 650 55 175 #965B39
+collides-rect 155 809 272 55 #965B39
+--
+rect 100 100 20 180 #404040
+rect 100 260 180 20 #404040
+rect 100 100 180 20 #404040
+rect 260 100 20 180 #404040
+rect 120 180 140 20 #404040
+rect 150 140 80 100 #404040
+rect 150 140 80 100 #404040
+rect 170 160 40 60 #CEC51C
+--
+layer2-rect 1086 864 125 55 #565656
+layer2-rect 1099 680 100 239 #565656
+layer2-rect 1099 680 475 100 #565656
+layer2-rect 1570 670 75 120 #565656
+--
+collides-rect 625 750 300 55 #404040
+--
+spawnpoint 359 289
+spawnpoint 980 331
+spawnpoint 773 886
