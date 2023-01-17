@@ -457,7 +457,7 @@ function encodePlayerData(plyd) {
             ply[1].lastAttack
         }:${JSON.stringify(ply[1].loadout)}:${ply[1].lastHand}:${
             ply[1].isMouseDown ? "1" : "0"
-        }:${ply[1].lastKiller}`;
+        }:${ply[1].lastKiller}:${ply[1].hexColor}`;
     });
     return final;
 }
@@ -1871,15 +1871,29 @@ io.on("connection", (socket) => {
         socket.emit("gs", gameState);
         ply = pl;
     });
+    function checkJoinOK() {
+        if (
+            ply &&
+            !ply.loadout.includes(-1) &&
+            usernames[socket.id] &&
+            ply.hexColor != "None"
+        ) {
+            socket.emit("join_ok", true);
+            return true;
+        } else {
+            socket.emit("join_ok", false);
+            return false;
+        }
+    }
     socket.on("set_username", (name) => {
         var ply = gameState.players[socket.id];
         usernames[socket.id] = name;
         socket.emit("usernames", usernames);
-        if (ply && !ply.loadout.includes(-1) && usernames[socket.id]) {
-            socket.emit("join_ok", true);
-        } else {
-            socket.emit("join_ok", false);
-        }
+        checkJoinOK();
+    });
+    socket.on("set_color", (hex) => {
+        ply.hexColor = hex;
+        checkJoinOK();
     });
     socket.on("respawn", () => {
         if (gameIsEnding) return;
@@ -2093,14 +2107,10 @@ io.on("connection", (socket) => {
         if (gameIsEnding) return;
         if (!ply) return;
         ply.loadout[wep[0]] = wep[1];
-        if (!ply.loadout.includes(-1) && usernames[socket.id]) {
-            socket.emit("join_ok", true);
-        } else {
-            socket.emit("join_ok", false);
-        }
+        checkJoinOK();
     });
     socket.on("ready", () => {
-        if (!ply.loadout.includes(-1) && usernames[socket.id]) {
+        if (checkJoinOK()) {
             ply.weapon = ply.loadout[1];
             ply.isSelectingPrimary = false;
             ply.canFire = true;

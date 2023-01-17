@@ -1034,6 +1034,7 @@ function parsePlayerData(plyd) {
             lastHand: di(ply[25]),
             isMouseDown: db(ply[26]),
             lastKiller: ply[27],
+            hexColor: ply[28],
         };
     });
     return final;
@@ -1243,7 +1244,7 @@ var plyDrawCtx = plyDrawCanvas.getContext("2d");
 function drawPlayer(ply, self, name, transparent = false) {
     if (ply.isDead || ply.isSelectingPrimary || !getWeaponData(ply.weapon))
         return;
-    var color = self ? "aqua" : name.startsWith("Bot") ? "#aae5a4" : "#ffdfae";
+    var color = name.startsWith("Bot") ? "#aae5a4" : ply.hexColor;
     plyDrawCtx.clearRect(0, 0, plyDrawCanvas.width, plyDrawCanvas.height);
     var usableContext = transparent ? plyDrawCtx : ctx;
     var ply2 = Object.assign({}, ply);
@@ -1597,6 +1598,7 @@ var defGameState = {
             hasWater: true,
             loadout: [-1, -1, -1, -1],
             lastKiller: "error",
+            hexColor: localStorage.getItem("funkymulti_hexcode") || "None",
         },
     },
     map: {
@@ -2170,6 +2172,26 @@ socket.on("join_ok", (d) => {
 
 var cursorPos = 0;
 
+var hexColors = {
+    Red: "#ff0000",
+    Orange: "#ff7700",
+    Yellow: "#ffe100",
+    Lime: "#00ff00",
+    Aqua: "#00ffff",
+    Blue: "#0000ff",
+    Purple: "#8800ff",
+    Pink: "#ff00e1",
+};
+
+function rectOverlap(x, y, rect) {
+    return (
+        storedMouseX > rect.x &&
+        storedMouseX < rect.x + rect.w &&
+        storedMouseY > rect.y &&
+        storedMouseY < rect.y + rect.h
+    );
+}
+
 function drawHUD() {
     if (!gameState.players[socket.id]) return;
     //#region Game Over Scoreboard
@@ -2286,6 +2308,48 @@ function drawHUD() {
             56 + "px sans-serif",
             "center"
         );
+
+        // the colors
+        var offsetX = w / 10;
+        var colorSize = 50;
+        var margin = 5;
+
+        var totalHeight =
+            Object.values(hexColors).length * (colorSize + margin) - margin;
+        Object.values(hexColors).forEach((color, i) => {
+            roundRect(
+                offsetX - colorSize / 2,
+                h / 2 - totalHeight / 2 + i * (colorSize + margin),
+                colorSize,
+                colorSize,
+                5,
+                color
+            );
+            if (ply.hexColor == color)
+                strokeRoundRect(
+                    offsetX - colorSize / 2,
+                    h / 2 - totalHeight / 2 + i * (colorSize + margin),
+                    colorSize,
+                    colorSize,
+                    5,
+                    2.5,
+                    "white"
+                );
+            if (
+                rectOverlap(storedMouseX, storedMouseY, {
+                    x: offsetX - colorSize / 2,
+                    y: h / 2 - totalHeight / 2 + i * (colorSize + margin),
+                    w: colorSize,
+                    h: colorSize,
+                })
+            ) {
+                if (getKeyDown("mouse1")) {
+                    socket.emit("set_color", color);
+                    localStorage.setItem("funkymulti_hexcode", color);
+                }
+                setCursorMode(CursorMode.Click);
+            }
+        });
 
         drawText(
             w / 2,
