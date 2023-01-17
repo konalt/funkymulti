@@ -416,7 +416,7 @@ function spawnBot() {
         r: false,
         spr: false,
         isDead: false,
-        weapon: botSettings.weapon,
+        weapon: opt.bot_weapon,
         canFire: true,
         wepClips: getMaxWepClips(),
         isReloading: false,
@@ -424,11 +424,11 @@ function spawnBot() {
         startedReloadingTime: Date.now(),
         respawnTimer: 0,
         deathTime: Date.now(),
-        chosenPrimary: botSettings.weapon,
+        chosenPrimary: opt.bot_weapon,
         isSelectingPrimary: false,
         canGrenade: true,
         hasWater: true,
-        loadout: [0, botSettings.weapon, 6, 8],
+        loadout: [0, opt.bot_weapon, 6, 8],
     };
     initScoreboardData(botname);
     io.emit("recieve_message", {
@@ -578,7 +578,7 @@ function dealPlyDamage(ply, dmg, hitLoc, notify) {
             case 5:
                 console.log(n + " is on a KILLING SPREE! [5]");
                 if (
-                    !(notify.startsWith("Bot") && botSettings.show_ks) ||
+                    !(notify.startsWith("Bot") && opt.bot_show_ks) ||
                     !notify.startsWith("Bot")
                 )
                     io.emit("killstreak", [
@@ -590,7 +590,7 @@ function dealPlyDamage(ply, dmg, hitLoc, notify) {
             case 10:
                 console.log(n + " is UNSTOPPABLE! [10]");
                 if (
-                    (notify.startsWith("Bot") && botSettings.show_ks) ||
+                    (notify.startsWith("Bot") && opt.bot_show_ks) ||
                     !notify.startsWith("Bot")
                 )
                     io.emit("killstreak", [
@@ -602,7 +602,7 @@ function dealPlyDamage(ply, dmg, hitLoc, notify) {
             case 15:
                 console.log(n + " is on a RAMPAGE! [15]");
                 if (
-                    (notify.startsWith("Bot") && botSettings.show_ks) ||
+                    (notify.startsWith("Bot") && opt.bot_show_ks) ||
                     !notify.startsWith("Bot")
                 )
                     io.emit("killstreak", [
@@ -614,7 +614,7 @@ function dealPlyDamage(ply, dmg, hitLoc, notify) {
             case 20:
                 console.log(n + " is GODLIKE! [20]");
                 if (
-                    (notify.startsWith("Bot") && botSettings.show_ks) ||
+                    (notify.startsWith("Bot") && opt.bot_show_ks) ||
                     !notify.startsWith("Bot")
                 )
                     io.emit("killstreak", [
@@ -626,7 +626,7 @@ function dealPlyDamage(ply, dmg, hitLoc, notify) {
             case 25:
                 console.log(n + " is PSYCHOPATHIC! [25]");
                 if (
-                    (notify.startsWith("Bot") && botSettings.show_ks) ||
+                    (notify.startsWith("Bot") && opt.bot_show_ks) ||
                     !notify.startsWith("Bot")
                 )
                     io.emit("killstreak", [
@@ -662,7 +662,9 @@ function bulletPlayerCheck(bullet, melee = false) {
     var r = false;
     Object.entries(gameState.players).forEach((ply) => {
         if (
-            (melee || !opt.bulletSelfDamage ? ply[0] == bullet.owner : false) ||
+            (melee || !opt.bullet_self_damage
+                ? ply[0] == bullet.owner
+                : false) ||
             !ply[1] ||
             ply[1].isDead ||
             ply[1].isSelectingPrimary ||
@@ -870,7 +872,7 @@ function tick() {
                 !ply.isMouseDown
             )
                 io.emit("stopsoundloop", plydata[0]);
-            if (isbot && botSettings.ai_enabled) doBotAI(ply, plydata[0]);
+            if (isbot && opt.bot_ai_enabled) doBotAI(ply, plydata[0]);
             if (!ply.isDead && !ply.isSelectingPrimary) {
                 var vector = [0, 0];
                 if (ply.u) vector[1]--;
@@ -926,7 +928,7 @@ function tick() {
             var destroyed = false;
             var decal = true;
             for (let i = 0; i < steps; i++) {
-                var ricochet = Math.random() * 100 < opt.ricochet_chance;
+                var ricochet = Math.random() * 100 < opt.bullet_ricochet_chance;
                 if (destroyed) continue;
                 if (!opt.bullet_ricochet_alt) {
                     bullet.x +=
@@ -1631,7 +1633,7 @@ function spawnDebugParticle(x, y, col) {
     });
 }
 
-var aimingDebug = false;
+var aimingDebug = true;
 
 function checkShit(md, barrelLength) {
     var mx = md[4];
@@ -1721,13 +1723,7 @@ function melee(md, owner) {
     return ret;
 }
 
-var opt = {
-    randomspread: true,
-    ricochet_chance: 10,
-    bulletSelfDamage: false,
-    smokeGrenades: false,
-    bullet_ricochet_alt: false,
-};
+var opt = {};
 
 function useWeapon(wep, plyd, md, od) {
     var plyname = plyd[0];
@@ -1757,7 +1753,7 @@ function useWeapon(wep, plyd, md, od) {
             var l = Math.sqrt(x * x + y * y);
             x = (x / l) * 100;
             y = (y / l) * 100;
-            if (opt.randomspread) {
+            if (opt.random_spread) {
                 x = x + (Math.random() * sp - sp / 2);
                 y = y + (Math.random() * sp - sp / 2);
             } else {
@@ -1910,15 +1906,15 @@ io.on("connection", (socket) => {
         if (msg.startsWith("!bot")) {
             switch (msg.split(" ")[1]) {
                 case "weapon":
-                    botSettings.weapon = gameState.weaponData[
+                    opt.bot_weapon = gameState.weaponData[
                         parseInt(msg.split(" ")[2])
                     ]
                         ? parseInt(msg.split(" ")[2])
                         : 1;
                     Object.entries(gameState.players).forEach((a) => {
                         if (a[0].startsWith("Bot")) {
-                            a[1].weapon = botSettings.weapon;
-                            a[1].loadout[1] = botSettings.weapon;
+                            a[1].weapon = opt.bot_weapon;
+                            a[1].loadout[1] = opt.bot_weapon;
                         }
                     });
                     socket.emit("recieve_message", {
@@ -1928,7 +1924,7 @@ io.on("connection", (socket) => {
                     saveSettings();
                     break;
                 case "ignore_players":
-                    botSettings.ignore_players = msg.split(" ")[2] == 1;
+                    opt.bot_ignore_players = msg.split(" ")[2] == 1;
                     socket.emit("recieve_message", {
                         author: "ServerBot",
                         content:
@@ -1939,7 +1935,7 @@ io.on("connection", (socket) => {
                     saveSettings();
                     break;
                 case "ai":
-                    botSettings.ai_enabled = msg.split(" ")[2] == 1;
+                    opt.bot_ai_enabled = msg.split(" ")[2] == 1;
                     socket.emit("recieve_message", {
                         author: "ServerBot",
                         content:
@@ -1952,7 +1948,7 @@ io.on("connection", (socket) => {
                     saveSettings();
                     break;
                 case "ignore_bots":
-                    botSettings.ignore_bots = msg.split(" ")[2] == 1;
+                    opt.bot_ignore_bots = msg.split(" ")[2] == 1;
                     socket.emit("recieve_message", {
                         author: "ServerBot",
                         content:
@@ -1963,7 +1959,7 @@ io.on("connection", (socket) => {
                     saveSettings();
                     break;
                 case "show_ks":
-                    botSettings.show_ks = msg.split(" ")[2] == 1;
+                    opt.bot_show_ks = msg.split(" ")[2] == 1;
                     socket.emit("recieve_message", {
                         author: "ServerBot",
                         content:
@@ -2054,7 +2050,8 @@ io.on("connection", (socket) => {
                     restartTick(parseInt(msg.split(" ")[1]));
                     io.emit("recieve_message", {
                         author: "ServerBot",
-                        content: "Tickrate changed to " + tickrate + " tps",
+                        content:
+                            "Tickrate changed to " + opt.sv_tickrate + " tps",
                     });
                 } else if (msg.split(" ")[1] == "inf") {
                     restartTick(NaN);
@@ -2071,7 +2068,7 @@ io.on("connection", (socket) => {
             } else {
                 io.emit("recieve_message", {
                     author: "ServerBot",
-                    content: "Current tickrate: " + tickrate + " tps",
+                    content: "Current tickrate: " + opt.sv_tickrate + " tps",
                 });
             }
             return;
@@ -2525,13 +2522,12 @@ function loadMap(mapname) {
         };
         data.split("\r\n").forEach((line, num) => {
             var lineData = line.split(" ");
-            if (lineData[0].startsWith("--")) return;
+            if (lineData[0].startsWith("--") || !lineData[0]) return;
             lineData = lineData.map((w) => bParse(w));
             lineData = lineData
                 .join(" ")
                 .split(" ")
                 .map((w) => bParse(w)); // we do this to accomodate variables with spaces
-            console.log(lineData);
             var layer2 = false;
             var collides = false;
             var destructible = false;
@@ -2888,14 +2884,6 @@ var navData = {};
 
 var killCounts = {};
 
-var botSettings = {
-    ignore_bots: false,
-    ignore_players: false,
-    show_ks: false,
-    weapon: 0,
-    ai_enabled: true,
-};
-
 function shootSound(wep) {
     switch (getWeaponData(wep).name) {
         case "Revolver":
@@ -3119,8 +3107,8 @@ var botCachedRoutes = [];
 
 function doBotAI(bot, botname) {
     function botGetClosestPlayer(skipDead) {
-        var ignore_players = botSettings.ignore_players;
-        var ignore_bots = botSettings.ignore_bots;
+        var ignore_players = opt.bot_ignore_players;
+        var ignore_bots = opt.bot_ignore_bots;
         var nearest = null;
         Object.entries(gameState.players).forEach((plydata) => {
             var ply = plydata[1];
@@ -3259,7 +3247,7 @@ function doBotAI(bot, botname) {
         ply.hp = 100;
         ply.hasWater = true;
         ply.isDead = false;
-        ply.weapon = botSettings.weapon;
+        ply.weapon = opt.bot_weapon;
         ply.canFire = true;
         ply.wepClips = getMaxWepClips();
         ply.isReloading = false;
@@ -3515,10 +3503,10 @@ function loadWaypointsAuto(map) {
     return wpts;
 }
 
-var tickrate = 60;
-
 function loadSettings() {
-    var data = fs.readFileSync("./settings.txt").toString();
+    var data = fs.existsSync("./settings.txt")
+        ? fs.readFileSync("./settings.txt").toString()
+        : fs.readFileSync("./settings_default.txt").toString();
     var options = {};
     data.split("\r\n").forEach((line) => {
         var a = line.split(" ")[0];
@@ -3535,37 +3523,26 @@ function loadSettings() {
             b = parseInt(line.split(" ")[1]);
         options[a] = b;
     });
-    console.log(options);
-    enableInfiniteAmmoGlitch = options.infinite_ammo_glitch;
-    navSnap = options.nav_snap;
-    opt.bulletSelfDamage = options.bullet_self_damage;
-    opt.bullet_ricochet_alt = options.bullet_ricochet_alt;
-    opt.smokeGrenades = options.smoke_grenades;
-    botSettings.weapon = gameState.weaponData[parseInt(options.bot_weapon)]
-        ? parseInt(options.bot_weapon)
-        : 1;
-    tickrate = parseInt(options.sv_tickrate);
-    opt.ricochet_chance = parseInt(options.bullet_ricochet_chance);
-    botSettings.ignore_bots = options.bot_ignore_bots;
-    botSettings.show_ks = options.bot_show_ks;
-    botSettings.ignore_players = options.bot_ignore_players;
+    if (!fs.existsSync("./settings.txt")) {
+        saveSettings();
+    }
+    opt = options;
 }
 
 var navSnap = false;
 
 function saveSettings() {
     var options = {};
-    options.enable_infinite_ammo = enableInfiniteAmmoGlitch ? 1 : 0;
-    options.nav_snap = navSnap ? 1 : 0;
-    options.bot_show_ks = botSettings.show_ks ? 1 : 0;
-    options.bot_ignore_bots = botSettings.ignore_bots ? 1 : 0;
-    options.bot_ignore_players = botSettings.ignore_players ? 1 : 0;
-    options.bot_weapon = botSettings.weapon + "int";
-    options.sv_tickrate = tickrate + "int";
-    options.bullet_ricochet_chance = opt.ricochet_chance + "int";
-    options.bullet_self_damage = opt.bulletSelfDamage ? 1 : 0;
-    options.bullet_ricochet_alt = opt.bullet_ricochet_alt ? 1 : 0;
-    options.smoke_grenades = opt.smokeGrenades ? 1 : 0;
+    Object.entries(opt).forEach((op) => {
+        switch (typeof op[1]) {
+            case "boolean":
+                options[op[0]] = op[1] ? 1 : 0;
+                break;
+            case "number":
+                options[op[0]] = op[1] + "int";
+                break;
+        }
+    });
     var text = "";
     Object.entries(options).forEach((e) => {
         text += e.join(" ") + "\r\n";
@@ -3581,12 +3558,12 @@ var textures = fs.readFileSync("textures.txt").toString().split("\r\n");
 
 loadSettings();
 
-var ticking = setInterval(tick, 1000 / tickrate);
+var ticking = setInterval(tick, 1000 / opt.sv_tickrate);
 
 function restartTick(newRate) {
     clearInterval(ticking);
     ticking = setInterval(tick, 1000 / newRate);
-    tickrate = newRate;
+    opt.sv_tickrate = newRate;
     saveSettings();
 }
 

@@ -1269,12 +1269,12 @@ function drawPlayer(ply, self, name, transparent = false) {
         hands[selHand]
     ) {
         var w = getWeaponData(ply.weapon);
-        var t = ply.timeSinceLastAttack;
+        var t = Date.now() - ply.lastAttack;
         var x = w.fireRate / 2;
         if (t < x) {
-            xOffset = (ply.timeSinceLastAttack / x) * 20;
+            xOffset = (t / x) * 20;
         } else if (t < w.fireRate) {
-            xOffset = Math.abs(20 - ((ply.timeSinceLastAttack - x) / x) * 20);
+            xOffset = Math.abs(20 - ((t - x) / x) * 20);
         }
         hands[selHand][0] += xOffset;
     }

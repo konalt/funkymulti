@@ -1,5 +1,6 @@
 enable_infinite_ammo 0
 nav_snap 0
+bot_ai_enabled 1
 bot_show_ks 1
 bot_ignore_bots 1
 bot_ignore_players 0
@@ -8,4 +9,5 @@ sv_tickrate 60int
 bullet_ricochet_chance 10int
 bullet_self_damage 0
 bullet_ricochet_alt 0
+random_spread 1
 smoke_grenades 1
