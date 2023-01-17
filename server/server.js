@@ -2563,7 +2563,7 @@ function loadMap(mapname) {
             var obj;
             var obj2;
             if (lineData[0] == "name") {
-                map.name = lineData[1];
+                map.name = lineData.slice(1).join(" ");
             } else if (lineData[0] == "background") {
                 map.background = lineData[1];
             } else if (lineData[0] == "outofbounds") {

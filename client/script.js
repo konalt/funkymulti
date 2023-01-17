@@ -2334,6 +2334,43 @@ function drawHUD() {
         drawRect(0, 0, w, h, "rgba(0,0,0, 0.75)");
         drawText(w / 2, (h / 12) * 1.5, "Loadout", "white", font(56), "center");
 
+        var infoTextX = (w / 10) * 8;
+        // map text
+        drawText(
+            infoTextX,
+            (h / 5) * 4,
+            "Current Map",
+            "white",
+            font(48),
+            "center"
+        );
+        drawText(
+            infoTextX,
+            (h / 5) * 4 + 48,
+            gameState.map.name,
+            "white",
+            font(32),
+            "center"
+        );
+
+        // game mode name
+        drawText(
+            infoTextX,
+            (h / 5) * 3,
+            "Current Gamemode",
+            "white",
+            font(48),
+            "center"
+        );
+        drawText(
+            infoTextX,
+            (h / 5) * 3 + 48,
+            "Free for All",
+            "white",
+            font(32),
+            "center"
+        );
+
         // the colors
         var offsetX = w / 10;
         var colorSize = 50;
