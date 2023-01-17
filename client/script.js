@@ -2877,7 +2877,7 @@ function testNav(txt) {
     conns = conns.map((c) => c.sort());
 }
 
-if (params.get("disablesmoothing")) {
+if (typeof params.get("disablesmoothing") == "string") {
     console.log("disable");
     ctx2.imageSmoothingEnabled = false;
 }
