@@ -917,6 +917,7 @@ var showNetInfo = false;
 var lastFpsTime = Date.now();
 var fps = 0;
 var optimizedDivisionSteps = 10;
+var wireframe = false;
 
 socket.on("gs", (data) => {
     localPlayerName = socket.id;
@@ -1956,13 +1957,24 @@ function drawMap(map, layer2) {
                 break;
             case "rect":
                 if (!obj.col.match(/@[A-z]+\.jpg/) || obj.highlighted) {
-                    drawRect(
-                        obj.x1 + cameraOffsets[0],
-                        obj.y1 + cameraOffsets[1],
-                        obj.x2,
-                        obj.y2,
-                        obj.highlighted ? "magenta" : obj.col
-                    );
+                    if (wireframe) {
+                        drawStrokedRect(
+                            obj.x1 + cameraOffsets[0],
+                            obj.y1 + cameraOffsets[1],
+                            obj.x2,
+                            obj.y2,
+                            obj.highlighted ? "magenta" : obj.col,
+                            2
+                        );
+                    } else {
+                        drawRect(
+                            obj.x1 + cameraOffsets[0],
+                            obj.y1 + cameraOffsets[1],
+                            obj.x2,
+                            obj.y2,
+                            obj.highlighted ? "magenta" : obj.col
+                        );
+                    }
                 } else {
                     var imgName = obj.col.substring(1);
                     ctx.drawImage(
