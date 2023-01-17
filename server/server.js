@@ -3523,10 +3523,10 @@ function loadSettings() {
             b = parseInt(line.split(" ")[1]);
         options[a] = b;
     });
+    opt = options;
     if (!fs.existsSync("./settings.txt")) {
         saveSettings();
     }
-    opt = options;
 }
 
 var navSnap = false;
