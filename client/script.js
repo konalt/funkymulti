@@ -233,6 +233,10 @@ setInterval(() => {
     });
 }, 5000);
 
+function font(size) {
+    return size + "px cursive";
+}
+
 document.onkeydown = function (k) {
     if (k.key != "F5" && k.key != "F12" && k.key != "F11") k.preventDefault();
     typeKeys.push(k.key);
@@ -392,7 +396,7 @@ function draw() {
                         ? "Connecting..."
                         : "Unable to connect to server!",
                     "white",
-                    24 + "px sans-serif",
+                    font(24),
                     "center"
                 );
             } else {
@@ -481,14 +485,7 @@ function draw() {
                         !messagemode
                     ) {
                         var text = "click here to respawn";
-                        drawText(
-                            9999,
-                            9999,
-                            "",
-                            "black",
-                            36 + "px sans-serif",
-                            "left"
-                        );
+                        drawText(9999, 9999, "", "black", font(36), "left");
                         var textWidth = ctx.measureText(text).width;
                         var boxWidth = textWidth + 10;
                         var rect = {
@@ -584,7 +581,7 @@ function draw() {
                                     9999,
                                     "",
                                     "black",
-                                    52 + "px sans-serif",
+                                    font(52),
                                     "center"
                                 );
                                 return (
@@ -597,14 +594,7 @@ function draw() {
                         }
                     }
                     var text = "Join!";
-                    drawText(
-                        9999,
-                        9999,
-                        "",
-                        "black",
-                        52 + "px sans-serif",
-                        "left"
-                    );
+                    drawText(9999, 9999, "", "black", font(52), "left");
                     var textWidth = ctx.measureText(text).width;
                     var boxWidth = textWidth + 10;
                     var rectB = {
@@ -642,7 +632,7 @@ function draw() {
                         (h / 12) * 5,
                         text,
                         "black",
-                        52 + "px sans-serif",
+                        font(52),
                         "center"
                     );
                 } else {
@@ -812,7 +802,7 @@ function draw() {
                         storedMem;
                     netinfo = netinfo.split("\n").reverse();
                     netinfo.forEach((line, index) => {
-                        ctx.font = 16 + "px sans-serif";
+                        ctx.font = font(16);
                         ctx.lineWidth = 3;
                         ctx.strokeStyle = "black";
                         ctx.strokeText(
@@ -825,7 +815,7 @@ function draw() {
                             h - 15 - 16 * index,
                             line,
                             "white",
-                            16 + "px sans-serif",
+                            font(16),
                             "left"
                         );
                     });
@@ -888,7 +878,7 @@ function draw() {
                 .slice(0, 5)
                 .join("\n")}`,
             "red",
-            "24px sans-serif",
+            font(24),
             "center"
         );
         console.log(e);
@@ -1239,6 +1229,18 @@ function clone(o) {
     } else return o;
 }
 
+var pollServer = [Date.now(), Date.now()];
+
+function serverTime() {
+    var o = Date.now() - pollServer[0];
+    return pollServer[1] + o;
+}
+
+socket.on("time", (t) => {
+    pollServer = [Date.now(), t];
+    console.log(pollServer.reduce((a, b) => a - b));
+});
+
 var plyDrawCtx = plyDrawCanvas.getContext("2d");
 
 function drawPlayer(ply, self, name, transparent = false) {
@@ -1270,7 +1272,7 @@ function drawPlayer(ply, self, name, transparent = false) {
         hands[selHand]
     ) {
         var w = getWeaponData(ply.weapon);
-        var t = Date.now() - ply.lastAttack;
+        var t = serverTime() - ply.lastAttack;
         var x = w.fireRate / 2;
         if (t < x) {
             xOffset = (t / x) * 20;
@@ -1389,7 +1391,7 @@ function drawPlayer(ply, self, name, transparent = false) {
             ply.y - 35 - 10 + cameraOffsets[1],
             name,
             "white",
-            20 + "px sans-serif",
+            font(20),
             "center",
             usableContext
         );
@@ -1680,7 +1682,7 @@ function drawText(
     y,
     text = "No text supplied",
     col = "red",
-    font = "48px sans-serif",
+    font = font(48),
     align = "center",
     ctx = _ctxref
 ) {
@@ -1710,7 +1712,7 @@ function drawTextWrapped(
     maxwidth,
     text = "No text supplied",
     col = "red",
-    font = "48px sans-serif",
+    font = font(48),
     align = "center"
 ) {
     ctx.fillStyle = col;
@@ -1959,7 +1961,7 @@ function drawMap(map, layer2) {
                     obj.y1 + cameraOffsets[1],
                     obj.text,
                     obj.col,
-                    obj.fontsize + "px sans-serif",
+                    font(obj.fontsize),
                     "center"
                 );
             case "circ":
@@ -2197,14 +2199,7 @@ function drawHUD() {
     //#region Game Over Scoreboard
     if (gameOver) {
         drawRect(0, 0, w, h, "rgba(0,0,0,0.75)");
-        drawText(
-            w / 2,
-            h / 10,
-            "Game Over!",
-            "white",
-            56 + "px sans-serif",
-            "center"
-        );
+        drawText(w / 2, h / 10, "Game Over!", "white", font(56), "center");
         formattedScoreboard.forEach((both, i) => {
             var boardCount = 6;
             if (i >= boardCount) return;
@@ -2241,7 +2236,7 @@ function drawHUD() {
                         singleHeight * 0.2 * 3,
                     txt,
                     "white",
-                    singleHeight * 0.4 + "px sans-serif",
+                    font(singleHeight * 0.4),
                     align
                 );
             });
@@ -2253,14 +2248,7 @@ function drawHUD() {
     //#region Death screen
     if (ply.isDead) {
         drawRect(0, 0, w, h, "rgba(255,64,64,0.5)");
-        drawText(
-            w / 2,
-            (h / 6) * 2,
-            "u ded lol",
-            "white",
-            56 + "px sans-serif",
-            "center"
-        );
+        drawText(w / 2, (h / 6) * 2, "u ded lol", "white", font(56), "center");
         if (ply.respawnTimer > 0) {
             drawText(
                 w / 2,
@@ -2270,12 +2258,12 @@ function drawHUD() {
                     " second" +
                     (Math.ceil(ply.respawnTimer / 1000) == 1 ? "" : "s"),
                 "white",
-                36 + "px sans-serif",
+                font(36),
                 "center"
             );
         } else {
             var text = "click here to respawn";
-            drawText(9999, 9999, "", "black", 36 + "px sans-serif", "left");
+            drawText(9999, 9999, "", "black", font(36), "left");
             var textWidth = ctx.measureText(text).width;
             var boxWidth = textWidth + 10;
             roundRect(
@@ -2286,28 +2274,14 @@ function drawHUD() {
                 5,
                 "white"
             );
-            drawText(
-                w / 2,
-                (h / 12) * 5,
-                text,
-                "black",
-                36 + "px sans-serif",
-                "center"
-            );
+            drawText(w / 2, (h / 12) * 5, text, "black", font(36), "center");
         }
     }
     //#endregion
     //#region Loadout Screen
     if (ply.isSelectingPrimary) {
         drawRect(0, 0, w, h, "rgba(0,0,0, 0.75)");
-        drawText(
-            w / 2,
-            (h / 12) * 1.5,
-            "Loadout",
-            "white",
-            56 + "px sans-serif",
-            "center"
-        );
+        drawText(w / 2, (h / 12) * 1.5, "Loadout", "white", font(56), "center");
 
         // the colors
         var offsetX = w / 10;
@@ -2356,7 +2330,7 @@ function drawHUD() {
             (h / 12) * 10 - 10,
             "Name",
             "white",
-            56 + "px sans-serif",
+            font(56),
             "center"
         );
         roundRect(w / 2 - 500 / 2, (h / 12) * 10, 500, 52 + 2.5, 5, "white");
@@ -2365,7 +2339,7 @@ function drawHUD() {
             (h / 12) * 10 + (50 - 7.5),
             username && !messagemode ? username : typing,
             "black",
-            50 + "px sans-serif",
+            font(50),
             "left"
         );
         var textWidth = ctx.measureText(
@@ -2419,14 +2393,14 @@ function drawHUD() {
                     rectB.y + 24,
                     wepname,
                     "white",
-                    24 + "px sans-serif",
+                    font(24),
                     "center"
                 );
                 x++;
             });
         });
         var text = "Join!";
-        drawText(9999, 9999, "", "black", 52 + "px sans-serif", "left");
+        drawText(9999, 9999, "", "black", font(52), "left");
         var textWidth = ctx.measureText(text).width;
         var boxWidth = textWidth + 10;
         roundRect(
@@ -2442,7 +2416,7 @@ function drawHUD() {
             (h / 12) * 5,
             text,
             "black",
-            52 + "px sans-serif",
+            font(52),
             "center"
         );
     } else {
@@ -2454,7 +2428,7 @@ function drawHUD() {
     var minutesLeft = timerDate.getMinutes().toString();
     var secondsLeft = timerDate.getSeconds().toString().padStart(2, "0");
     var text = `${minutesLeft}:${secondsLeft}`;
-    ctx.font = 56 + "px sans-serif";
+    ctx.font = font(56);
     var textWidth = ctx.measureText(text).width;
     roundRect(
         w / 2 -
@@ -2471,7 +2445,7 @@ function drawHUD() {
         56 * 2,
         text,
         "white",
-        56 + "px sans-serif",
+        font(56),
         "center"
     );
     //#endregion
@@ -2538,7 +2512,7 @@ function drawHUD() {
                     "/" +
                     getWeaponData(ply.weapon).clipSize,
                 "white",
-                72 + "px sans-serif",
+                font(72),
                 "center"
             );
     }
@@ -2558,7 +2532,7 @@ function drawHUD() {
             (h / 12) * 3 - 10,
             "Reloading...",
             "white",
-            36 + "px sans-serif",
+            font(36),
             "center"
         );
         roundRect(
@@ -2678,7 +2652,7 @@ function drawHUD() {
                 20 + 250 + 5 + chatFontSize,
                 typing,
                 "white",
-                chatFontSize + "px sans-serif",
+                font(chatFontSize),
                 "left"
             );
         }
@@ -2705,7 +2679,7 @@ function drawHUD() {
             charsHoriz,
             chatText,
             "white",
-            chatFontSize + "px sans-serif",
+            font(chatFontSize),
             "left"
         );
     }
@@ -2776,7 +2750,7 @@ function drawNavData(d) {
             wpt.y + cameraOffsets[1],
             typeof wpt.id !== "undefined" ? wpt.id : "?",
             isRouteDest ? "blue" : "red",
-            24 + "px sans-serif",
+            font(24),
             "center",
             navCtx
         );

@@ -1393,6 +1393,7 @@ var usernames = {};
 setInterval(() => {
     io.emit("usernames", usernames);
     io.emit("mem", process.memoryUsage());
+    io.emit("time", Date.now());
 }, 1000);
 
 function valueInRange(val, min, max) {
