@@ -49,7 +49,7 @@ var gameState = {
     rockets: [],
     smokeParticles: [],
     flames: [],
-    gameTimer: 5 * 60 * 1000,
+    gameTimer: 0,
     roundStartTime: Date.now(),
     lightsOn: true,
     russkiyPlane: {
@@ -187,7 +187,7 @@ var gameState = {
                     70,
                     10,
                     5,
-                    2,
+                    5,
                     "black",
                     usableContext
                 );
@@ -211,15 +211,29 @@ var gameState = {
             isAutomatic: false,
             draw: (ply, _ctx, cameraOffsets) => {
                 roundRect(
-                    ply.x + 30,
+                    ply.x + 25,
                     ply.y - 13 / 2,
-                    80,
+                    85,
                     13,
                     13 / 2,
                     "#000033",
                     usableContext
                 );
+                strokeRoundRect(
+                    ply.x + 25,
+                    ply.y - 5,
+                    85,
+                    13,
+                    13 / 2,
+                    5,
+                    "black",
+                    usableContext
+                );
             },
+            hands: [
+                [40, -5],
+                [80, 5],
+            ],
             clipSize: 1,
             reloadTime: 1200,
             spread: 0,
@@ -227,7 +241,7 @@ var gameState = {
             moveMult: 1,
             bulletSpeedMult: 2,
             barrelLength: 80,
-            id: "shotgun",
+            id: "sniper",
         },
         {
             name: "Flamethrower",
@@ -725,7 +739,7 @@ function tick() {
     /* if (Object.keys(gameState.players).filter((k) => !k.startsWith("Bot")))
         return; */
     gameState.gameTimer =
-        5 * 60 * 1000 - (Date.now() - gameState.roundStartTime);
+        opt.game_time - (Date.now() - gameState.roundStartTime);
     if (nTick % timerUpdates == 0) io.emit("timer", gameState.gameTimer);
     if (gameState.gameTimer <= 0 && !gameIsEnding) {
         console.log("Game over!");
