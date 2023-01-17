@@ -11,3 +11,4 @@ bullet_self_damage 0
 bullet_ricochet_alt 0
 random_spread 1
 smoke_grenades 1
+aim_debug 0

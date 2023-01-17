@@ -1633,8 +1633,6 @@ function spawnDebugParticle(x, y, col) {
     });
 }
 
-var aimingDebug = true;
-
 function checkShit(md, barrelLength) {
     var mx = md[4];
     var my = md[5];
@@ -1657,12 +1655,12 @@ function checkShit(md, barrelLength) {
             cx += x;
             cy += y;
             if (distance(cx, cy, px, py) > barrelLength) {
-                if (aimingDebug) spawnDebugParticle(cx, cy, "0,255,0");
+                if (opt.aim_debug) spawnDebugParticle(cx, cy, "0,255,0");
                 ret = false;
                 done = true;
             }
             if (!isSafeBulletPos({ x: cx, y: cy })) {
-                if (aimingDebug) spawnDebugParticle(cx, cy, "255,0,255");
+                if (opt.aim_debug) spawnDebugParticle(cx, cy, "255,0,255");
                 ret = true;
                 done = true;
             }
@@ -1701,13 +1699,13 @@ function melee(md, owner) {
             cx += x;
             cy += y;
             if (distance(cx, cy, px, py) > 42) {
-                if (aimingDebug) spawnDebugParticle(cx, cy, "0,255,0");
+                if (opt.aim_debug) spawnDebugParticle(cx, cy, "0,255,0");
                 ret = false;
                 done = true;
             }
             var p = bulletPlayerCheck({ x: cx, y: cy, owner: owner[0] }, true);
             if (p) {
-                if (aimingDebug) spawnDebugParticle(cx, cy, "255,0,255");
+                if (opt.aim_debug) spawnDebugParticle(cx, cy, "255,0,255");
                 ret = p;
                 done = true;
             }
@@ -1760,7 +1758,7 @@ function useWeapon(wep, plyd, md, od) {
                 x = x + i * (sp * 0.2) - (sp * 0.2 * wep.bulletCount) / 2;
                 y = y + i * (sp * 0.2) - (sp * 0.2 * wep.bulletCount) / 2;
             }
-            if (aimingDebug)
+            if (opt.aim_debug)
                 gameState.particles.push({
                     x: x + ply.x,
                     y: y + ply.y,
@@ -1780,7 +1778,7 @@ function useWeapon(wep, plyd, md, od) {
             bullet.lastPosY = oy;
             bullet.dx = x * 10;
             bullet.dy = y * 10;
-            if (aimingDebug)
+            if (opt.aim_debug)
                 gameState.particles.push({
                     x: bullet.dx + ply.x,
                     y: bullet.dy + ply.y,
@@ -1814,7 +1812,7 @@ function useWeapon(wep, plyd, md, od) {
         y = (y / l) * 100;
         x = x + (Math.random() * sp - sp / 2);
         y = y + (Math.random() * sp - sp / 2);
-        if (aimingDebug)
+        if (opt.aim_debug)
             gameState.particles.push({
                 x: x + ply.x,
                 y: y + ply.y,
@@ -2215,8 +2213,8 @@ io.on("connection", (socket) => {
         var py = md[3];
         var x = mx - px;
         var y = my - py;
-        if (aimingDebug) spawnDebugParticle(mx, my, "255,0,0");
-        if (aimingDebug) spawnDebugParticle(px, py, "0,0,255");
+        if (opt.aim_debug) spawnDebugParticle(mx, my, "255,0,0");
+        if (opt.aim_debug) spawnDebugParticle(px, py, "0,0,255");
         if (res || !ply.canFire) {
             if (res) io.emit("stopsoundloop", socket.id);
             return;
@@ -3180,8 +3178,8 @@ function doBotAI(bot, botname) {
         var py = md[3];
         var x = mx - px;
         var y = my - py;
-        if (aimingDebug) spawnDebugParticle(mx, my, "255,0,0");
-        if (aimingDebug) spawnDebugParticle(px, py, "0,0,255");
+        if (opt.aim_debug) spawnDebugParticle(mx, my, "255,0,0");
+        if (opt.aim_debug) spawnDebugParticle(px, py, "0,0,255");
         if (res || !ply.canFire) return;
         ply.lastAttack = Date.now();
         var l = Math.sqrt(x * x + y * y);
@@ -3579,7 +3577,7 @@ function restartTick(newRate) {
 }
 
 function logDebug(text) {
-    if (aimingDebug) console.log("[debug] " + text);
+    if (opt.aim_debug) console.log("[debug] " + text);
 }
 
 function navFindConnsSingular(wpt1, data, maxDist = Infinity) {
