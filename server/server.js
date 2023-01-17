@@ -1015,11 +1015,11 @@ function tick() {
                                     });
                                 io.emit("sound", "glass_break");
                                 io.emit("gs", gameState);
-                                setTimeout(() => {
+                                /* setTimeout(() => {
                                     gameState.map.geo.push(old);
                                     gameState.map.colliding.push(old);
                                     io.emit("gs", gameState);
-                                }, 100);
+                                }, 100); */
                             }
                         }
                     }
@@ -1868,6 +1868,7 @@ io.on("connection", (socket) => {
             gameState.players[socket.id].wepClips == null
         )
             gameState.players[socket.id].wepClips = getMaxWepClips();
+        socket.emit("gs", gameState);
         ply = pl;
     });
     socket.on("set_username", (name) => {

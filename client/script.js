@@ -283,7 +283,7 @@ var firstConnect = true;
 
 socket.on("connect", () => {
     socket.emit("set_username", username);
-    socket.emit("ply", gameState.players.__local);
+    socket.emit("ply", defGameState.players.__local);
     loadSavedLoadoutData();
     firstConnect = false;
 });
@@ -1570,7 +1570,7 @@ var Weapon = {
     M16: 1,
 };
 
-var gameState = {
+var defGameState = {
     players: {
         __local: {
             x: 9999,
@@ -1671,6 +1671,7 @@ var gameState = {
         },
     ],
 };
+var gameState = { ...defGameState };
 
 function drawText(
     x,
@@ -2834,7 +2835,7 @@ socket.on("connect_error", (data) => {
 });
 
 socket.on("error", () => {
-    window.location.reload();
+    gameState = { ...defGameState };
 });
 
 var navData = {};
