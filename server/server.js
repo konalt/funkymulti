@@ -877,7 +877,7 @@ function tick() {
                 ply.x +=
                     vector[0] *
                     gameState.moveSpeed *
-                    (ply.spr ? 2 : 1) *
+                    (ply.spr ? 2.5 : 1) *
                     (ply.isReloading ? 0.75 : 1) *
                     (getWeaponData(ply.weapon)
                         ? getWeaponData(ply.weapon)
@@ -895,7 +895,7 @@ function tick() {
                 ply.y +=
                     vector[1] *
                     gameState.moveSpeed *
-                    (ply.spr ? 2 : 1) *
+                    (ply.spr ? 2.5 : 1) *
                     (ply.isReloading ? 0.75 : 1) *
                     getWeaponData(ply.weapon).moveMult;
                 if (!isSafePos(ply)) {
@@ -1008,12 +1008,13 @@ function tick() {
                                     gameState.map.colliding.filter((g) => {
                                         return g != obj;
                                     });
+                                io.emit("sound", "glass_break");
                                 io.emit("gs", gameState);
                                 setTimeout(() => {
                                     gameState.map.geo.push(old);
                                     gameState.map.colliding.push(old);
                                     io.emit("gs", gameState);
-                                }, 60000);
+                                }, 100);
                             }
                         }
                     }
@@ -1429,10 +1430,10 @@ function isSafePos(ply) {
 
 function isSafeBulletPos(ply) {
     var ret = true;
-    if (ply.x < 0) ret = false;
-    if (ply.x > gameState.map.width) ret = false;
-    if (ply.y < 0) ret = false;
-    if (ply.y > gameState.map.height) ret = false;
+    if (ply.x < -gameState.map.width) ret = false;
+    if (ply.x > gameState.map.width * 2) ret = false;
+    if (ply.y < -gameState.map.height) ret = false;
+    if (ply.y > gameState.map.height * 2) ret = false;
     gameState.map.colliding.forEach((obj) => {
         if (!ret || obj.playerclip) return;
         switch (obj.type) {
@@ -2890,6 +2891,9 @@ function shootSound(wep) {
         case "Revolver":
             io.emit("sound", "revolver_shoot");
             break;
+        case "Laser Pistol":
+            io.emit("sound", "laser_shoot");
+            break;
         case "M16 Rifle":
             io.emit("sound", "ar_shoot");
             break;
@@ -2922,6 +2926,9 @@ function reloadSound(wep) {
     switch (getWeaponData(wep).name) {
         case "Revolver":
             io.emit("sound", "revolver_reload");
+            break;
+        case "Laser Pistol":
+            io.emit("sound", "laser_reload");
             break;
         case "M16 Rifle":
             io.emit("sound", "ar_reload");
