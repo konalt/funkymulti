@@ -917,7 +917,6 @@ var showNetInfo = false;
 var lastFpsTime = Date.now();
 var fps = 0;
 var optimizedDivisionSteps = 10;
-var wireframe = false;
 
 socket.on("gs", (data) => {
     localPlayerName = socket.id;
@@ -1957,7 +1956,7 @@ function drawMap(map, layer2) {
                 break;
             case "rect":
                 if (!obj.col.match(/@[A-z]+\.jpg/) || obj.highlighted) {
-                    if (wireframe) {
+                    if (showNetInfo) {
                         drawStrokedRect(
                             obj.x1 + cameraOffsets[0],
                             obj.y1 + cameraOffsets[1],
