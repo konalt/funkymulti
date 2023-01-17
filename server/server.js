@@ -2584,6 +2584,7 @@ function loadMap(mapname) {
                 map.ents.spawns.push({
                     x: lineData[1],
                     y: lineData[2],
+                    invis: typeof vars["__SET_INVIS_SPAWNS"] !== "undefined",
                 });
             } else if (lineData[0] == "line") {
                 obj = {

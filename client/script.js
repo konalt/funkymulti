@@ -705,7 +705,7 @@ function draw() {
 
                 drawMap(gameState.map, false);
                 gameState.map.ents.spawns.forEach((prt) => {
-                    drawSpawnpoint(prt);
+                    if (!prt.invis) drawSpawnpoint(prt);
                 });
                 Object.entries(gameState.players).forEach((ply) => {
                     if (
