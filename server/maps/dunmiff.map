@@ -13,8 +13,11 @@ var c collides-rect
 var i ent window
 var o ent door
 var r #8c4100
+var d playerclip-rect
+var e #ba9456
+var l rect
+var n #564523
 var __RECT_SIZER_INFO 19,22,25
-var __SET_INVIS_SPAWNS 1
 -- THE ACTUAL MAP
 -- Doorvoids
 rect 528 1640 2928 88 black
@@ -51,6 +54,31 @@ $c 1826 1075 13 110 $r
 $c 826 390 13 110 $r
 $c 787 390 13 110 $r
 $c 185 166 13 110 $r
+-- Desks
+$d 629 789 247 126 $e
+$d 751 915 125 241 $e
+$d 1126 772 247 368 $e
+$d 1234 1334 246 246 $e
+$d 751 1334 246 246 $e
+$d 111 1213 354 246 $e
+$d 417 138 282 133 $e
+$d 972 176 475 164 $e
+$d 89 729 165 91 $e
+$d 271 842 91 151 $e
+$d 3187 1264 246 126 $e
+$d 3308 1018 125 244 $e
+$d 3100 578 251 125 $e
+$d 3030 756 127 246 $e
+$d 2906 830 127 246 $e
+-- Desk clump lines
+$l 751 914 125 3 $n
+$l 1126 896 247 3 $n
+$l 1251 896 3 244 $n
+$l 872 1334 3 246 $n
+$l 1356 1334 3 246 $n
+$l 354 1213 3 246 $n
+$l 111 1336 244 3 $n
+$l 3029 830 3 172 $n
 -- Walls
 $c 284 0 22 351 $w
 $c 0 276 90 26 $w
@@ -105,14 +133,14 @@ $c 2069 1213 64 21 $w
 $c 787 500 52 20 $w
 -- Spawnpoints
 spawnpoint 127 195
-spawnpoint 558 120
+spawnpoint 558 85
 spawnpoint 411 360
 spawnpoint 681 360
-spawnpoint 951 197
-spawnpoint 1184 197
-spawnpoint 1484 197
-spawnpoint 1386 385
-spawnpoint 1109 385
+spawnpoint 951 95
+spawnpoint 1184 95
+spawnpoint 1484 95
+spawnpoint 1386 400
+spawnpoint 1109 400
 spawnpoint 614 1589
 spawnpoint 2000 1152
 spawnpoint 1838 1414
