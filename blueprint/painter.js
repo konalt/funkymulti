@@ -33,9 +33,9 @@ var tempctx = tempcanvas.getContext("2d");
 
 function roundRect(x, y, w, h, radius, col) {
     if (typeof radius === "number") {
-        radius = {tl: radius, tr: radius, br: radius, bl: radius};
+        radius = { tl: radius, tr: radius, br: radius, bl: radius };
     } else {
-        radius = {...{tl: 0, tr: 0, br: 0, bl: 0}, ...radius};
+        radius = { ...{ tl: 0, tr: 0, br: 0, bl: 0 }, ...radius };
     }
     ctx.fillStyle = col;
     ctx.beginPath();
@@ -53,9 +53,9 @@ function roundRect(x, y, w, h, radius, col) {
 }
 function strokeRoundRect(x, y, w, h, radius, stroke, col) {
     if (typeof radius === "number") {
-        radius = {tl: radius, tr: radius, br: radius, bl: radius};
+        radius = { tl: radius, tr: radius, br: radius, bl: radius };
     } else {
-        radius = {...{tl: 0, tr: 0, br: 0, bl: 0}, ...radius};
+        radius = { ...{ tl: 0, tr: 0, br: 0, bl: 0 }, ...radius };
     }
     ctx.beginPath();
     ctx.moveTo(x + radius.tl, y);
@@ -131,11 +131,22 @@ function drawText(
     }
 }
 
-const wrap = (s, w) =>
-    s.replace(
-        new RegExp(`(?![^\\n]{1,${w}}$)([^\\n]{1,${w}})\\s`, "g"),
-        "$1\n"
-    );
+function wrap(text, width) {
+    function txtW(txt) {
+        return ctx.measureText(txt).width;
+    }
+    var lines = [];
+    var curLine = [];
+    text.split(" ").forEach((word) => {
+        curLine.push(word);
+        if (txtW(curLine.join(" ")) > width) {
+            lines.push(curLine.join(" "));
+            curLine = [];
+        }
+    });
+    lines.push(curLine);
+    return lines.join("\n");
+}
 
 function drawTextWrapped(
     x,

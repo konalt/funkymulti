@@ -377,7 +377,6 @@ function loadSavedLoadoutData() {
     var t =
         localStorage.getItem("funkymulti_loadout") ||
         [-1, -1, -1, -1].join(":");
-    console.log(t);
     t.split(":").forEach((w, i) => {
         if (w == -1) return;
         socket.emit("choose_weapon", [i, w]);
@@ -408,7 +407,6 @@ function draw() {
                 }
                 if (enableCamera) {
                     if (gameState.players[socket.id].isDead) {
-                        console.log(lp.lastKiller);
                         var lk = gameState.players[lp.lastKiller];
                         if (lk)
                             cameraOffsets = [
@@ -562,7 +560,6 @@ function draw() {
                         setCursorMode(CursorMode.Text);
                         if (getKeyDown("mouse1")) {
                             // start typing username
-                            console.log("username");
                             messagemode = true;
                             typing = username;
                             cursorPos = username.length;
@@ -1238,7 +1235,6 @@ function serverTime() {
 
 socket.on("time", (t) => {
     pollServer = [Date.now(), t];
-    console.log(pollServer.reduce((a, b) => a - b));
 });
 
 var plyDrawCtx = plyDrawCanvas.getContext("2d");
@@ -1700,11 +1696,27 @@ function drawText(
     }
 }
 
-const wrap = (s, w) =>
-    s.replace(
-        new RegExp(`(?![^\\n]{1,${w}}$)([^\\n]{1,${w}})\\s`, "g"),
-        "$1\n"
-    );
+function wrap(text, width) {
+    function txtW(txt) {
+        return ctx.measureText(txt).width;
+    }
+    var lines = [];
+    var curLine = [];
+    text.split(" ").forEach((word) => {
+        if (txtW(curLine.join(" ")) > width) {
+            lines.push(curLine.join(" "));
+            curLine = [word];
+        } else if (word.includes("\n")) {
+            curLine.push(word.split("\n")[0]);
+            lines.push(curLine.join(" "));
+            curLine = [word.split("\n")[1]];
+        } else {
+            curLine.push(word);
+        }
+    });
+    lines.push(curLine.join(" "));
+    return lines.join("\n");
+}
 
 function drawTextWrapped(
     x,
@@ -2643,20 +2655,21 @@ function drawHUD() {
         );
         if (messagemode) {
             var writeStr = `${typing}`;
-            if (writeStr.length > charsHoriz) {
-                writeStr = writeStr.slice(-charsHoriz);
+            ctx.font = font(chatFontSize);
+            if (ctx.measureText(writeStr).width > 300) {
+                while (ctx.measureText(writeStr).width > 300) {
+                    writeStr = writeStr.substring(1);
+                }
             }
-            writeStr = writeStr;
             drawText(
                 1633 - 20 - 300 + 5,
                 20 + 250 + 5 + chatFontSize,
-                typing,
+                writeStr,
                 "white",
                 font(chatFontSize),
                 "left"
             );
         }
-        charsHoriz = Math.round((300 * 1.66) / (chatFontSize / 2 + 5));
         charsVert = Math.round(250 / (chatFontSize + 5));
         roundRect(1633 - 20 - 300, 20, 300, 250, 5, "rgba(0,0,0,0.5)");
         var chatText = chat
@@ -2666,18 +2679,18 @@ function drawHUD() {
                 }`;
             })
             .join("\n");
-        var chatTextWrapped = wrap(chatText, charsHoriz);
+        ctx.font = font(chatFontSize);
+        var chatTextWrapped = wrap(chatText, 250);
         if (chatTextWrapped.split("\n").length > charsVert) {
             chatTextWrapped = chatTextWrapped
                 .split("\n")
                 .slice(-charsVert)
                 .join("\n");
         }
-        drawTextWrapped(
+        drawText(
             1633 - 20 - 300 + 5,
             20 + 12 + 5,
-            charsHoriz,
-            chatText,
+            chatTextWrapped,
             "white",
             font(chatFontSize),
             "left"
@@ -2708,7 +2721,6 @@ function drawHUD() {
             "red",
             5
         );
-        console.log(w, h);
         drawLine(w / 2, 0, w / 2, h, "blue", 2);
         drawLine(0, h / 2, w, h / 2, "blue", 2);
         if (navData.waypoints) {
