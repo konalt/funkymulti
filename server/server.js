@@ -2561,7 +2561,7 @@ function loadMap(mapname) {
                 lineData[0] = lineData[0].substring("destroy-".length);
             }
             var obj;
-            var obj2;
+            var secobjs = [];
             if (lineData[0] == "name") {
                 map.name = lineData.slice(1).join(" ");
             } else if (lineData[0] == "background") {
@@ -2643,7 +2643,7 @@ function loadMap(mapname) {
                             health: 1,
                             playerclip: false,
                         };
-                        obj2 = {
+                        secobjs.push({
                             type: "rect",
                             x1: lineData[2],
                             y1: lineData[3],
@@ -2656,7 +2656,7 @@ function loadMap(mapname) {
                             destructible: false,
                             health: 100,
                             playerclip: true,
-                        };
+                        });
                         break;
                     case "door":
                         var vertical = lineData[5] == "v";
@@ -2819,9 +2819,11 @@ function loadMap(mapname) {
                         num
                 );
             }
-            if (obj2) {
-                map.geo.push(obj2);
-                if (obj2.collides || obj2.playerclip) map.colliding.push(obj2);
+            if (secobjs.length) {
+                secobjs.forEach((x) => {
+                    map.geo.push(x);
+                    if (x.collides || x.playerclip) map.colliding.push(x);
+                });
             }
             if (obj) {
                 map.geo.push(obj);
