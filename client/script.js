@@ -2341,6 +2341,14 @@ function drawHUD() {
 
         var totalHeight =
             Object.values(hexColors).length * (colorSize + margin) - margin;
+        drawText(
+            offsetX,
+            h / 2 - totalHeight / 2 - 10,
+            "Player Colour",
+            "white",
+            font(56),
+            "center"
+        );
         Object.values(hexColors).forEach((color, i) => {
             roundRect(
                 offsetX - colorSize / 2,
