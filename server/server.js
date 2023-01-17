@@ -455,9 +455,9 @@ function encodePlayerData(plyd) {
             ply[1].isSelectingPrimary ? "1" : "0"
         }:${ply[1].canGrenade ? "1" : "0"}:${ply[1].hasWater ? "1" : "0"}:${
             ply[1].lastAttack
-        }:${ply[1].timeSinceLastAttack}:${JSON.stringify(ply[1].loadout)}:${
-            ply[1].lastHand
-        }:${ply[1].isMouseDown ? "1" : "0"}:${ply[1].lastKiller}`;
+        }:${JSON.stringify(ply[1].loadout)}:${ply[1].lastHand}:${
+            ply[1].isMouseDown ? "1" : "0"
+        }:${ply[1].lastKiller}`;
     });
     return final;
 }
@@ -714,13 +714,17 @@ function bulletPlayerCheck(bullet, melee = false) {
 
 var gameIsEnding = false;
 
+var timerUpdates = 20;
+var nTick = -1;
+
 function tick() {
+    nTick++;
     // Hibernation
     /* if (Object.keys(gameState.players).filter((k) => !k.startsWith("Bot")))
         return; */
     gameState.gameTimer =
         5 * 60 * 1000 - (Date.now() - gameState.roundStartTime);
-    io.emit("timer", gameState.gameTimer);
+    if (nTick % timerUpdates == 0) io.emit("timer", gameState.gameTimer);
     if (gameState.gameTimer <= 0 && !gameIsEnding) {
         console.log("Game over!");
         gameIsEnding = true;
@@ -844,7 +848,6 @@ function tick() {
             if (ply.isDead && ply.respawnTimer > -1) {
                 ply.respawnTimer = -(Date.now() - ply.deathTime - 5000);
             }
-            ply.timeSinceLastAttack = Date.now() - ply.lastAttack;
             if (ply.x == 9999 && ply.y == 9999) {
                 var spawn =
                     gameState.map.ents.spawns[
@@ -1366,14 +1369,21 @@ function tick() {
             }
         });
     }
-    io.emit("plyd", encodePlayerData(gameState.players));
-    io.emit("buld", encodeBulletData(gameState.bullets));
-    io.emit("grnd", encodeGrenadeData(gameState.grenades));
-    io.emit("prtd", encodeParticleData(gameState.particles));
-    io.emit("rktd", encodeRocketData(gameState.rockets));
-    io.emit("smkd", encodeSmokeData(gameState.smokeParticles));
-    io.emit("flmd", encodeFlameData(gameState.flames));
-    io.emit("pckd", encodePickupData(gameState.map.ents.pickups));
+    cachedEmit("plyd", encodePlayerData(gameState.players));
+    cachedEmit("buld", encodeBulletData(gameState.bullets));
+    cachedEmit("grnd", encodeGrenadeData(gameState.grenades));
+    cachedEmit("prtd", encodeParticleData(gameState.particles));
+    cachedEmit("rktd", encodeRocketData(gameState.rockets));
+    cachedEmit("smkd", encodeSmokeData(gameState.smokeParticles));
+    cachedEmit("flmd", encodeFlameData(gameState.flames));
+    cachedEmit("pckd", encodePickupData(gameState.map.ents.pickups));
+}
+
+var lastDatas = {};
+function cachedEmit(name, text) {
+    if (lastDatas[name] == text) return;
+    lastDatas[name] = text;
+    io.emit(name, text);
 }
 
 var usernames = {};

@@ -436,7 +436,11 @@ function draw() {
                 isMovingLeft = getKey("keya");
                 isMovingRight = getKey("keyd");
                 isSprinting = getKey("shiftleft");
-                if (moveData() != lastMoveData && !messagemode) {
+                if (
+                    moveData() != lastMoveData &&
+                    !messagemode &&
+                    !lp.isSelectingPrimary
+                ) {
                     socket.emit("move", moveData());
                     lastMoveData = moveData();
                 }
@@ -1036,11 +1040,10 @@ function parsePlayerData(plyd) {
             canGrenade: db(ply[21]),
             hasWater: db(ply[22]),
             lastAttack: di(ply[23]),
-            timeSinceLastAttack: di(ply[24]),
-            loadout: dl(ply[25]),
-            lastHand: di(ply[26]),
-            isMouseDown: db(ply[27]),
-            lastKiller: ply[28],
+            loadout: dl(ply[24]),
+            lastHand: di(ply[25]),
+            isMouseDown: db(ply[26]),
+            lastKiller: ply[27],
         };
     });
     return final;
