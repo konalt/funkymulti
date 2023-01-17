@@ -19,16 +19,8 @@ if (params.get("viewportscale")) {
 }
 
 function properScale(cnv) {
-    cnv.width = 1633;
-    cnv.height = 919;
-    return;
-    if (window.innerWidth > window.innerHeight) {
-        cnv.height = window.innerHeight * optscale;
-        cnv.width = window.innerHeight * (16 / 9) * optscale;
-    } else {
-        cnv.width = window.innerWidth * optscale;
-        cnv.height = window.innerWidth * (9 / 16) * optscale;
-    }
+    cnv.width = 1633 * optscale;
+    cnv.height = 919 * optscale;
 }
 
 function updateOptScale() {
@@ -44,8 +36,8 @@ function updateOptScale() {
     properScale(plyDrawCanvas);
     properScale(navCanvas);
 
-    storedMouseX = storedMouseXUnscaled * optscale;
-    storedMouseY = storedMouseYUnscaled * optscale;
+    storedMouseX = storedMouseXUnscaled;
+    storedMouseY = storedMouseYUnscaled;
 
     chatFontSize = 18;
 }
@@ -917,8 +909,8 @@ var storedMouseX = 0,
 var storedMouseXUnscaled = 0,
     storedMouseYUnscaled = 0;
 canvas.onmousemove = function (evt) {
-    storedMouseX = evt.offsetX * optscale * scale;
-    storedMouseY = evt.offsetY * optscale * scale;
+    storedMouseX = evt.offsetX * scale;
+    storedMouseY = evt.offsetY * scale;
     storedMouseXUnscaled = evt.offsetX;
     storedMouseYUnscaled = evt.offsetY;
 };
@@ -2890,7 +2882,7 @@ if (params.get("disablesmoothing")) {
     ctx2.imageSmoothingEnabled = false;
 }
 
-ctx.scale(919 / canvas.height, 919 / canvas.height);
+ctx.scale((919 / canvas.height) * optscale, (919 / canvas.height) * optscale);
 
 var scale = 919 / canvas.height;
 
