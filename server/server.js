@@ -2863,6 +2863,91 @@ function loadMap(mapname) {
                             thickness: 5,
                         });
                         break;
+                    case "officechair180":
+                        var chaircolbox = 75;
+                        var x = lineData[2];
+                        var y = lineData[3];
+                        collides = true;
+                        secobjs.push({
+                            type: "rect",
+                            x1: x - chaircolbox / 2,
+                            y1: y - chaircolbox / 2,
+                            x2: chaircolbox,
+                            y2: chaircolbox,
+                            col: "transparent",
+                            geoId: "OfficeChair" + num,
+                            layer2: false,
+                            destructible: false,
+                            health: 100,
+                            playerclip: true,
+                        });
+                        secobjs.push({
+                            type: "circ",
+                            x1: x,
+                            y1: y,
+                            r: (chaircolbox / 2) * 0.9,
+                            col: "#696e80",
+                            thickness: 5,
+                        });
+                        secobjs.push({
+                            type: "roundrect",
+                            x1: x + chaircolbox * (0.475 - 0.25),
+                            y1: y - chaircolbox * 0.45,
+                            x2: chaircolbox * 0.25,
+                            y2: chaircolbox * 0.7,
+                            col: "#696e80",
+                            radius: chaircolbox * 0.075,
+                        });
+                        secobjs.push({
+                            type: "strokeroundrect",
+                            x1: x + chaircolbox * (0.475 - 0.25),
+                            y1: y - chaircolbox * 0.45,
+                            x2: chaircolbox * 0.25,
+                            y2: chaircolbox * 0.7,
+                            col: "black",
+                            radius: chaircolbox * 0.075,
+                            thickness: 5,
+                        });
+                        secobjs.push({
+                            type: "roundrect",
+                            x1: x - chaircolbox * 0.475,
+                            y1: y - chaircolbox * 0.45,
+                            x2: chaircolbox * 0.25,
+                            y2: chaircolbox * 0.7,
+                            col: "#696e80",
+                            radius: chaircolbox * 0.075,
+                        });
+                        secobjs.push({
+                            type: "strokeroundrect",
+                            x1: x - chaircolbox * 0.475,
+                            y1: y - chaircolbox * 0.45,
+                            x2: chaircolbox * 0.25,
+                            y2: chaircolbox * 0.7,
+                            col: "black",
+                            radius: chaircolbox * 0.075,
+                            thickness: 5,
+                        });
+                        secobjs.push({
+                            type: "roundrect",
+                            x1: x - chaircolbox * 0.5,
+                            y1: y + chaircolbox * (0.475 - 0.25),
+                            x2: chaircolbox,
+                            y2: chaircolbox * 0.25,
+                            col: "#696e80",
+                            radius: chaircolbox * 0.075,
+                            collides: true,
+                        });
+                        secobjs.push({
+                            type: "strokeroundrect",
+                            x1: x - chaircolbox * 0.5,
+                            y1: y + chaircolbox * (0.475 - 0.25),
+                            x2: chaircolbox,
+                            y2: chaircolbox * 0.25,
+                            col: "black",
+                            radius: chaircolbox * 0.075,
+                            thickness: 5,
+                        });
+                        break;
                     default:
                         console.log(
                             '[warning] unrecognized ent "' +
