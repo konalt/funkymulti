@@ -17,6 +17,9 @@ var d playerclip-rect
 var e #ba9456
 var l rect
 var n #564523
+var f ent officechair
+var f90 ent officechair90
+var t transparent
 var __RECT_SIZER_INFO 19,22,25
 -- THE ACTUAL MAP
 -- Doorvoids
@@ -79,6 +82,44 @@ $l 1356 1334 3 246 $n
 $l 354 1213 3 246 $n
 $l 111 1336 244 3 $n
 $l 3029 830 3 172 $n
+-- ANNOYING ASS PAM DESK
+curve 252 818 272 848 272 818 $e 5
+curve 252 733 357 842 358 735 $e 5
+$d 253 730 43 16 $t
+$d 294 738 32 12 $t
+$d 315 747 14 15 $t
+$d 325 755 14 15 $t
+$d 337 765 12 32 $t
+$d 348 784 12 58 $t
+$l 254 736 33 83 $e
+$l 254 736 33 83 $e
+$l 285 739 14 105 $e
+$l 273 806 83 38 $e
+$l 298 744 9 67 $e
+$l 295 796 57 10 $e
+$l 303 762 29 41 $e
+$l 305 747 12 17 $e
+$l 315 753 10 11 $e
+$l 324 758 5 6 $e
+$l 329 786 21 11 $e
+$l 330 764 5 26 $e
+$l 329 779 17 9 $e
+$l 334 769 7 11 $e
+$l 263 818 14 7 $e
+$l 296 823 8 12 $e
+$l 266 812 20 19 $e
+-- Office Chairs
+$f90 1251 703
+$f 1080 1010
+$f90 766 735
+$f 200 874
+$f 2857 937
+$f 3259 1137
+$f90 3310 1434
+$f90 250 1163
+$f 688 1465
+$f 1174 1468
+$f90 570 87
 -- Walls
 $c 284 0 22 351 $w
 $c 0 276 90 26 $w
@@ -133,7 +174,6 @@ $c 2069 1213 64 21 $w
 $c 787 500 52 20 $w
 -- Spawnpoints
 spawnpoint 127 195
-spawnpoint 558 85
 spawnpoint 411 360
 spawnpoint 681 360
 spawnpoint 951 95

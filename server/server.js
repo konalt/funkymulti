@@ -1409,6 +1409,7 @@ function isSafePos(ply) {
     gameState.map.colliding.forEach((obj) => {
         if (!ret) return;
         switch (obj.type) {
+            case "roundrect":
             case "rect":
                 var rectA = { x: ply.x - 30, y: ply.y - 30, w: 60, h: 60 };
                 var rectB = { x: obj.x1, y: obj.y1, w: obj.x2, h: obj.y2 };
@@ -1450,6 +1451,7 @@ function isSafeBulletPos(ply) {
     gameState.map.colliding.forEach((obj) => {
         if (!ret || obj.playerclip) return;
         switch (obj.type) {
+            case "roundrect":
             case "rect":
                 var rectA = { x: ply.x - 1, y: ply.y - 1, w: 2, h: 2 };
                 var rectB = { x: obj.x1, y: obj.y1, w: obj.x2, h: obj.y2 };
@@ -1479,6 +1481,7 @@ function isSafeGrenadePos(ply) {
         if (!ret || obj.playerclip) return;
         switch (obj.type) {
             case "rect":
+            case "roundrect":
                 var rectA = { x: ply.x - 5, y: ply.y - 5, w: 10, h: 10 };
                 var rectB = { x: obj.x1, y: obj.y1, w: obj.x2, h: obj.y2 };
                 var xOverlap =
@@ -1516,6 +1519,7 @@ function getCollidedObject(ply) {
         if (ret || obj.playerclip) return;
         switch (obj.type) {
             case "rect":
+            case "roundrect":
                 var rectA = { x: ply.x - 1, y: ply.y - 1, w: 2, h: 2 };
                 var rectB = { x: obj.x1, y: obj.y1, w: obj.x2, h: obj.y2 };
                 var xOverlap =
@@ -2689,6 +2693,176 @@ function loadMap(mapname) {
                             active: true,
                         });
                         break;
+                    case "officechair":
+                        var chaircolbox = 75;
+                        var x = lineData[2];
+                        var y = lineData[3];
+                        collides = true;
+                        secobjs.push({
+                            type: "rect",
+                            x1: x - chaircolbox / 2,
+                            y1: y - chaircolbox / 2,
+                            x2: chaircolbox,
+                            y2: chaircolbox,
+                            col: "transparent",
+                            geoId: "OfficeChair" + num,
+                            layer2: false,
+                            destructible: false,
+                            health: 100,
+                            playerclip: true,
+                        });
+                        secobjs.push({
+                            type: "circ",
+                            x1: x,
+                            y1: y,
+                            r: (chaircolbox / 2) * 0.9,
+                            col: "#696e80",
+                            thickness: 5,
+                        });
+                        secobjs.push({
+                            type: "roundrect",
+                            x1: x - chaircolbox * 0.4,
+                            y1: y - chaircolbox * 0.475,
+                            x2: chaircolbox * 0.7,
+                            y2: chaircolbox * 0.25,
+                            col: "#696e80",
+                            radius: chaircolbox * 0.075,
+                        });
+                        secobjs.push({
+                            type: "strokeroundrect",
+                            x1: x - chaircolbox * 0.4,
+                            y1: y - chaircolbox * 0.475,
+                            x2: chaircolbox * 0.7,
+                            y2: chaircolbox * 0.25,
+                            col: "black",
+                            radius: chaircolbox * 0.075,
+                            thickness: 5,
+                        });
+                        secobjs.push({
+                            type: "roundrect",
+                            x1: x - chaircolbox * 0.4,
+                            y1: y + chaircolbox * (0.475 - 0.25),
+                            x2: chaircolbox * 0.7,
+                            y2: chaircolbox * 0.25,
+                            col: "#696e80",
+                            radius: chaircolbox * 0.075,
+                        });
+                        secobjs.push({
+                            type: "strokeroundrect",
+                            x1: x - chaircolbox * 0.4,
+                            y1: y + chaircolbox * (0.475 - 0.25),
+                            x2: chaircolbox * 0.7,
+                            y2: chaircolbox * 0.25,
+                            col: "black",
+                            radius: chaircolbox * 0.075,
+                            thickness: 5,
+                        });
+                        secobjs.push({
+                            type: "roundrect",
+                            x1: x - chaircolbox * 0.55,
+                            y1: y - chaircolbox * 0.5,
+                            x2: chaircolbox * 0.25,
+                            y2: chaircolbox,
+                            col: "#696e80",
+                            radius: chaircolbox * 0.075,
+                            collides: true,
+                        });
+                        secobjs.push({
+                            type: "strokeroundrect",
+                            x1: x - chaircolbox * 0.55,
+                            y1: y - chaircolbox * 0.5,
+                            x2: chaircolbox * 0.25,
+                            y2: chaircolbox,
+                            col: "black",
+                            radius: chaircolbox * 0.075,
+                            thickness: 5,
+                        });
+                        break;
+                    case "officechair90":
+                        var chaircolbox = 75;
+                        var x = lineData[2];
+                        var y = lineData[3];
+                        collides = true;
+                        secobjs.push({
+                            type: "rect",
+                            x1: x - chaircolbox / 2,
+                            y1: y - chaircolbox / 2,
+                            x2: chaircolbox,
+                            y2: chaircolbox,
+                            col: "transparent",
+                            geoId: "OfficeChair" + num,
+                            layer2: false,
+                            destructible: false,
+                            health: 100,
+                            playerclip: true,
+                        });
+                        secobjs.push({
+                            type: "circ",
+                            x1: x,
+                            y1: y,
+                            r: (chaircolbox / 2) * 0.9,
+                            col: "#696e80",
+                            thickness: 5,
+                        });
+                        secobjs.push({
+                            type: "roundrect",
+                            x1: x - chaircolbox * 0.475,
+                            y1: y - chaircolbox * 0.4,
+                            x2: chaircolbox * 0.25,
+                            y2: chaircolbox * 0.75,
+                            col: "#696e80",
+                            radius: chaircolbox * 0.075,
+                        });
+                        secobjs.push({
+                            type: "strokeroundrect",
+                            x1: x - chaircolbox * 0.475,
+                            y1: y - chaircolbox * 0.4,
+                            x2: chaircolbox * 0.25,
+                            y2: chaircolbox * 0.75,
+                            col: "black",
+                            radius: chaircolbox * 0.075,
+                            thickness: 5,
+                        });
+                        secobjs.push({
+                            type: "roundrect",
+                            x1: x + chaircolbox * (0.475 - 0.25),
+                            y1: y - chaircolbox * 0.4,
+                            x2: chaircolbox * 0.25,
+                            y2: chaircolbox * 0.7,
+                            col: "#696e80",
+                            radius: chaircolbox * 0.075,
+                        });
+                        secobjs.push({
+                            type: "strokeroundrect",
+                            x1: x + chaircolbox * (0.475 - 0.25),
+                            y1: y - chaircolbox * 0.4,
+                            x2: chaircolbox * 0.25,
+                            y2: chaircolbox * 0.7,
+                            col: "black",
+                            radius: chaircolbox * 0.075,
+                            thickness: 5,
+                        });
+                        secobjs.push({
+                            type: "roundrect",
+                            x1: x - chaircolbox * 0.5,
+                            y1: y - chaircolbox * 0.55,
+                            x2: chaircolbox,
+                            y2: chaircolbox * 0.25,
+                            col: "#696e80",
+                            radius: chaircolbox * 0.075,
+                            collides: true,
+                        });
+                        secobjs.push({
+                            type: "strokeroundrect",
+                            x1: x - chaircolbox * 0.5,
+                            y1: y - chaircolbox * 0.55,
+                            x2: chaircolbox,
+                            y2: chaircolbox * 0.25,
+                            col: "black",
+                            radius: chaircolbox * 0.075,
+                            thickness: 5,
+                        });
+                        break;
                     default:
                         console.log(
                             '[warning] unrecognized ent "' +
@@ -2953,6 +3127,7 @@ function reloadSound(wep) {
             io.emit("sound", "sniper_reload");
             break;
         default:
+            if (getWeaponData(wep).name.startsWith("__melee_")) break;
             console.log(
                 "Please add a reload sound effect for weapon " +
                     getWeaponData(wep).name

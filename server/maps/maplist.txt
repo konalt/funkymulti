@@ -1,4 +1,1 @@
-industry
-lab
-tzone
 dunmiff
