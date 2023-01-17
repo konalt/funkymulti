@@ -234,7 +234,8 @@ setInterval(() => {
 }, 5000);
 
 function font(size) {
-    return size + "px cursive";
+    var fontname = "'Roboto', sans-serif";
+    return size + "px " + fontname;
 }
 
 document.onkeydown = function (k) {
