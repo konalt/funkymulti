@@ -1095,6 +1095,7 @@ function parseGrenadeData(buld) {
             x: parseInt(bul[0]),
             y: parseInt(bul[1]),
             a: parseInt(bul[2]),
+            isSmokeGrenade: bul[3] == 1,
         });
     });
     return final;
@@ -1448,28 +1449,68 @@ function drawGrenade(grn) {
     ctx.translate(grn.x + cameraOffsets[0], grn.y + cameraOffsets[1]);
     ctx.rotate((grn.a * Math.PI) / 180);
     ctx.translate(-(grn.x + cameraOffsets[0]), -(grn.y + cameraOffsets[1]));
-    drawRect(
-        grn.x + cameraOffsets[0] - 5,
-        grn.y + cameraOffsets[1] - 20,
-        10,
-        15,
-        "#3f6b1d"
-    );
-    drawStrokedRect(
-        grn.x + cameraOffsets[0] - 5,
-        grn.y + cameraOffsets[1] - 20,
-        10,
-        15,
-        "black",
-        3
-    );
-    drawCirc(
-        grn.x + cameraOffsets[0],
-        grn.y + cameraOffsets[1],
-        10,
-        "#4d9119",
-        3
-    );
+    if (grn.isSmokeGrenade) {
+        drawRect(
+            grn.x + cameraOffsets[0] - 7.5,
+            grn.y + cameraOffsets[1] - 10,
+            15,
+            20,
+            "#62945c"
+        );
+        drawRect(
+            grn.x + cameraOffsets[0] - 7.5,
+            grn.y + cameraOffsets[1] + 2,
+            15,
+            4,
+            "#b8b8b8"
+        );
+        drawStrokedRect(
+            grn.x + cameraOffsets[0] - 7.5,
+            grn.y + cameraOffsets[1] - 10,
+            15,
+            20,
+            "black",
+            3
+        );
+        drawRect(
+            grn.x + cameraOffsets[0] - 5,
+            grn.y + cameraOffsets[1] - 10 - 7,
+            10,
+            6,
+            "grey"
+        );
+        drawStrokedRect(
+            grn.x + cameraOffsets[0] - 5,
+            grn.y + cameraOffsets[1] - 10 - 7,
+            10,
+            6,
+            "black",
+            3
+        );
+    } else {
+        drawRect(
+            grn.x + cameraOffsets[0] - 5,
+            grn.y + cameraOffsets[1] - 20,
+            10,
+            15,
+            "#3f6b1d"
+        );
+        drawStrokedRect(
+            grn.x + cameraOffsets[0] - 5,
+            grn.y + cameraOffsets[1] - 20,
+            10,
+            15,
+            "black",
+            3
+        );
+        drawCirc(
+            grn.x + cameraOffsets[0],
+            grn.y + cameraOffsets[1],
+            10,
+            "#4d9119",
+            3
+        );
+    }
     ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
 

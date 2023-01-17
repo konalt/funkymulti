@@ -1569,7 +1569,9 @@ function encodeRocketData(rktd) {
 function encodeGrenadeData(grnd) {
     var final = "";
     grnd.forEach((g, i) => {
-        final += `${i == 0 ? "" : "\n"}${g.x}:${g.y}:${g.a}`;
+        final += `${i == 0 ? "" : "\n"}${g.x}:${g.y}:${g.a}:${
+            g.isSmokeGrenade ? 1 : 0
+        }`;
     });
     return final;
 }
