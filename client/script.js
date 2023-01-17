@@ -2917,11 +2917,11 @@ function highlighted(ply) {
 
 window.addEventListener("contextmenu", (e) => {
     e.preventDefault();
+    console.log(gameState.players[socket.id].x, gameState.players[socket.id].y);
     highlighted({
         x: e.offsetX - cameraOffsets[0],
         y: e.offsetY - cameraOffsets[1],
     });
-    console.log(e.offsetX, e.offsetY);
 });
 
 var localPlayerName = socket.id;

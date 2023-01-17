@@ -14,6 +14,7 @@ var i ent window
 var o ent door
 var r #8c4100
 var __RECT_SIZER_INFO 19,22,25
+var __SET_INVIS_SPAWNS 1
 -- THE ACTUAL MAP
 -- Doorvoids
 rect 528 1640 2928 88 black
@@ -103,3 +104,22 @@ $c 1857 1075 22 159 $w
 $c 1779 1213 190 21 $w
 $c 2069 1213 64 21 $w
 $c 787 500 52 20 $w
+-- Spawnpoints
+spawnpoint 127 195
+spawnpoint 558 120
+spawnpoint 411 360
+spawnpoint 681 360
+spawnpoint 951 197
+spawnpoint 1184 197
+spawnpoint 1484 197
+spawnpoint 1386 385
+spawnpoint 1109 385
+spawnpoint 614 1589
+spawnpoint 2000 1152
+spawnpoint 1838 1414
+spawnpoint 2432 1343
+spawnpoint 3010 100
+spawnpoint 2685 137
+spawnpoint 3351 97
+spawnpoint 3351 461
+spawnpoint 2725 1561
