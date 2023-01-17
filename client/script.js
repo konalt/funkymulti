@@ -2241,10 +2241,7 @@ var hexColors = {
 
 function rectOverlap(x, y, rect) {
     return (
-        storedMouseX > rect.x &&
-        storedMouseX < rect.x + rect.w &&
-        storedMouseY > rect.y &&
-        storedMouseY < rect.y + rect.h
+        x > rect.x && x < rect.x + rect.w && y > rect.y && y < rect.y + rect.h
     );
 }
 
