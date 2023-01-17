@@ -42,8 +42,6 @@ function updateOptScale() {
     chatFontSize = 18;
 }
 
-var w;
-var h;
 updateOptScale();
 
 function sz(size) {
