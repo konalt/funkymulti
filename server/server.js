@@ -2557,6 +2557,7 @@ function loadMap(mapname) {
             OOBCol: map.outofbounds,
             Name: map.name,
             BGCol: map.background,
+            __FORCE_DISABLE_SPLIT_OPTIMIZATION: false,
         };
         data.split("\r\n").forEach((line, num) => {
             var lineData = line.split(" ");
@@ -2668,6 +2669,8 @@ function loadMap(mapname) {
                             destructible: true,
                             health: 1,
                             playerclip: false,
+                            disableSplitting:
+                                vars["__FORCE_DISABLE_SPLIT_OPTIMIZATION"] == 1,
                         };
                         secobjs.push({
                             type: "rect",
@@ -2682,6 +2685,8 @@ function loadMap(mapname) {
                             destructible: false,
                             health: 100,
                             playerclip: true,
+                            disableSplitting:
+                                vars["__FORCE_DISABLE_SPLIT_OPTIMIZATION"] == 1,
                         });
                         break;
                     case "door":
@@ -2705,6 +2710,8 @@ function loadMap(mapname) {
                             destructible: false,
                             health: 100,
                             playerclip: false,
+                            disableSplitting:
+                                vars["__FORCE_DISABLE_SPLIT_OPTIMIZATION"] == 1,
                         };
                         break;
                     case "healthpack":
@@ -3028,6 +3035,8 @@ function loadMap(mapname) {
                     destructible: destructible,
                     health: 100,
                     playerclip: playerclip,
+                    disableSplitting:
+                        vars["__FORCE_DISABLE_SPLIT_OPTIMIZATION"] == 1,
                 };
             } else if (lineData[0] == "strokerect") {
                 obj = {

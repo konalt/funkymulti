@@ -22,6 +22,7 @@ var f90 ent officechair90
 var f180 ent officechair180
 var t transparent
 var __RECT_SIZER_INFO 19,22,25
+var __FORCE_DISABLE_SPLIT_OPTIMIZATION 1
 -- THE ACTUAL MAP
 -- Doorvoids
 rect 528 1640 2928 88 black

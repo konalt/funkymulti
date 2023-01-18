@@ -798,6 +798,7 @@ function draw() {
                             .join("\n") +
                         "\nserver mem usage: " +
                         storedMem;
+                    ctx.font = font(16);
                     drawText(
                         w -
                             15 -
@@ -806,7 +807,7 @@ function draw() {
                                     .split("\n")
                                     .map((v) => ctx.measureText(v).width)
                             ),
-                        h - 15 - (netinfo.split("\n").length + 3) * 21,
+                        h - 15 - (netinfo.split("\n").length - 1) * 21,
                         netinfo,
                         "white",
                         font(16),
@@ -921,6 +922,7 @@ socket.on("gs", (data) => {
         if (
             obj.type != "rect" ||
             obj.col.includes("rgba") ||
+            obj.disableSplitting ||
             !newData.map.camera
         ) {
             newGeo.push(obj);
