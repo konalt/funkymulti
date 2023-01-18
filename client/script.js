@@ -953,6 +953,7 @@ socket.on("gs", (data) => {
     });
     newData.map.geo = newGeo;
     gameState = newData;
+    updateOptScale();
 });
 socket.on("wep_clips", (d) => {
     if (gameState.players[socket.id]) gameState.players[socket.id].wepClips = d;
