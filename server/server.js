@@ -2147,6 +2147,7 @@ io.on("connection", (socket) => {
         }
     });
     socket.on("map_reload", () => {
+        loadSettings();
         gameState.map = loadMap(maplist[mapIndex]);
         io.emit("gs", gameState);
     });
