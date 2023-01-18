@@ -1752,23 +1752,27 @@ function drawText(
     ctx.lineWidth = 0.01;
     var lines = text.split("\n");
     var lineheight = parseInt(font) + 5;
+    var textData = {
+        color: col,
+        isBold: false,
+        isItalic: false,
+        isUnderline: false,
+    };
     for (var i = 0; i < lines.length; i++) {
         if (!lines[i]) continue;
-        var textData = {
-            color: col,
-            isBold: false,
-            isItalic: false,
-            isUnderline: false,
-        };
         var matches = [];
+        var j = 0;
         while ((match = textEscapeCode.exec(lines[i])) != null) {
-            matches.push([match[0], match.index]);
+            matches.push([match[0], match.index - j * 2]);
+            j++;
         }
         lines[i] = lines[i].replace(textEscapeCode, "");
         var lineWidth = align == "center" ? ctx.measureText(lines[i]).width : 0;
         var xOffset = -lineWidth / 2;
         lines[i].split("").forEach((letter, index) => {
-            var match = matches.find((m) => m[1] == index);
+            var match = matches.filter((m) => m[1] == index)[
+                matches.filter((m) => m[1] == index).length - 1
+            ];
             if (match) {
                 var matchCode = parseInt(match[0][1], 16);
                 textData.color = ccodes[matchCode];
@@ -2822,8 +2826,8 @@ function drawHUD() {
         if (messagemode) {
             var writeStr = `${typing}`;
             ctx.font = font(chatFontSize);
-            if (ctx.measureText(text).width > 300) {
-                while (ctx.measureText(text).width > 300) {
+            if (ctx.measureText(writeStr).width > 295) {
+                while (ctx.measureText(writeStr).width > 295) {
                     writeStr = writeStr.substring(1);
                 }
             }
@@ -2840,13 +2844,14 @@ function drawHUD() {
         roundRect(1633 - 20 - 300, 20, 300, 250, 5, "rgba(0,0,0,0.5)");
         var chatText = chat
             .map((m) => {
-                return `${m.author == "___NONAME___" ? "" : m.author + ": "}${
-                    m.content
-                }`;
+                return `&f${
+                    m.author == "___NONAME___" ? "" : m.author + "&7: "
+                }${m.content}`;
             })
             .join("\n");
+        console.log(chatText);
         ctx.font = font(chatFontSize);
-        var chatTextWrapped = wrap(chatText, 275);
+        var chatTextWrapped = wrap(chatText, 250);
         if (chatTextWrapped.split("\n").length > charsVert) {
             chatTextWrapped = chatTextWrapped
                 .split("\n")
