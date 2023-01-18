@@ -3398,21 +3398,50 @@ function getWptFromId(id) {
     return navData.waypoints.find((wpt) => wpt.id == id);
 }
 
-function getRouteDist(route) {
-    var e = 0;
-    for (let i = 0; i < route.length; i++) {
-        const cur = route[i];
-        const next = route[i + 1];
-        if (!next) continue;
-        e += distance(cur.x, cur.y, next.x, next.y);
-    }
-    return [e, route];
-}
-
 var botCachedRoutes = [];
 
+function getAngleArbitrary(x, y, x2, y2) {
+    let gameY = y2;
+    let gameX = x2;
+    let mouseY = y;
+    let mouseX = x;
+    let theta = 0;
+
+    if (mouseX > gameX) {
+        theta =
+            (Math.atan((gameY - mouseY) / (gameX - mouseX)) * 180) / Math.PI;
+    } else if (mouseX < gameX) {
+        theta =
+            180 +
+            (Math.atan((gameY - mouseY) / (gameX - mouseX)) * 180) / Math.PI;
+    } else if (mouseX == gameX) {
+        if (mouseY > gameY) {
+            theta = 90;
+        } else {
+            theta = 270;
+        }
+    }
+    return Math.round(theta);
+}
+
+function getClosestPlayer(pos) {
+    var cls = null;
+    Object.values(gameState.players).forEach((ply) => {
+        if (!cls) return (cls = ply);
+        if (
+            distance(pos.x, pos.y, ply.x, ply.y) <
+                distance(pos.x, pos.y, cls.x, cls.y) &&
+            distance(pos.x, pos.y, ply.x, ply.y) != 0
+        )
+            cls = ply;
+    });
+    return cls;
+}
+
 function doBotAI(bot, botname) {
-    bot.a++;
+    var closestPlayer = getClosestPlayer(bot);
+    if (!closestPlayer) return;
+    bot.a = getAngleArbitrary(closestPlayer.x, closestPlayer.y, bot.x, bot.y);
 }
 
 // this is a test !
