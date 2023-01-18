@@ -818,6 +818,16 @@ function draw() {
                         font(16),
                         "left"
                     );
+                    navData.waypoints.forEach((wpt) => {
+                        drawText(
+                            wpt.x + cameraOffsets[0],
+                            wpt.y + cameraOffsets[1],
+                            wpt.id,
+                            "red",
+                            font(24),
+                            "center"
+                        );
+                    });
                 }
                 if (getKeyDown("keyi") && !messagemode) {
                     renderScale -= 0.1;
@@ -2916,71 +2926,7 @@ socket.on("nav_route", (r) => {
 
 var navDataDrawn = false;
 
-function drawNavData(d) {
-    var cameraOffsets = [0, 0];
-
-    navCanvas.width = gameState.map.width;
-    navCanvas.height = gameState.map.height;
-
-    navCtx.clearRect(0, 0, gameState.map.width, gameState.map.height);
-
-    function getWptFromId(id) {
-        return d.waypoints.find((wpt) => wpt.id == id);
-    }
-    if (d.waypoints.length == 0) return;
-    d.waypoints.forEach((wpt) => {
-        var connectedWaypoints = [];
-        wpt.conns.forEach((conn) => {
-            connectedWaypoints.push(getWptFromId(conn));
-        });
-        var isRouteDest = false;
-        drawText(
-            wpt.x + cameraOffsets[0],
-            wpt.y + cameraOffsets[1],
-            typeof wpt.id !== "undefined" ? wpt.id : "?",
-            isRouteDest ? "blue" : "red",
-            font(24),
-            "center",
-            navCtx
-        );
-        var isRouted = false;
-        connectedWaypoints.forEach((wpt2) => {
-            if (!wpt2) return;
-            navRoute.forEach((wpt3) => {
-                if (wpt3.id == wpt2.id) isRouted = true;
-            });
-            var midX = wpt.x + (wpt2.x - wpt.x) * 0.5;
-            var midY = wpt.y + (wpt2.y - wpt.y) * 0.5;
-            drawLine(
-                wpt.x + cameraOffsets[0],
-                wpt.y + cameraOffsets[1],
-                wpt2.x + cameraOffsets[0],
-                wpt2.y + cameraOffsets[1],
-                "rgba(0,0,255,0.2)",
-                2,
-                navCtx
-            );
-            drawLine(
-                wpt.x + cameraOffsets[0],
-                wpt.y + cameraOffsets[1],
-                midX + cameraOffsets[0],
-                midY + cameraOffsets[1],
-                "blue",
-                2,
-                navCtx
-            );
-        });
-        drawRect(
-            wpt.x - 30 + cameraOffsets[0],
-            wpt.y - 30 + cameraOffsets[1],
-            60,
-            60,
-            isRouted ? "rgba(255,128,128,0.2)" : "rgba(128,255,128,0.2)",
-            navCtx
-        );
-    });
-    navDataDrawn = true;
-}
+function drawNavData(d) {}
 
 var tempNav = "";
 var navIndex = -1;

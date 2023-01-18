@@ -2149,6 +2149,8 @@ io.on("connection", (socket) => {
     socket.on("map_reload", () => {
         loadSettings();
         gameState.map = loadMap(maplist[mapIndex]);
+        loadWaypoints(maplist[mapIndex]);
+        io.emit("nav_data", navData);
         io.emit("gs", gameState);
     });
     socket.on("spawn_ai", () => {
@@ -3472,9 +3474,9 @@ function loadWaypoints(mapname) {
                 return wpt;
             });
         }
-        navAutoFindConns(wpts);
+        //navAutoFindConns(wpts);
         navData.waypoints = wpts;
-        navAutoFindRoutes(wpts);
+        //navAutoFindRoutes(wpts);
         return wpts;
     } catch (e) {
         console.log("Unable to load navfile " + mapname);
