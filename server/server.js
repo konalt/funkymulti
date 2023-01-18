@@ -447,7 +447,7 @@ function spawnBot() {
     initScoreboardData(botname);
     io.emit("recieve_message", {
         author: "___NONAME___",
-        content: botname + " has joined the game",
+        content: botname + "&7 has joined the game",
     });
 }
 
@@ -2142,7 +2142,7 @@ io.on("connection", (socket) => {
             ply.canFire = true;
             io.emit("recieve_message", {
                 author: "___NONAME___",
-                content: usernames[socket.id] + " has joined the game",
+                content: usernames[socket.id] + "&7 has joined the game",
             });
         }
     });
