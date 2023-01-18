@@ -798,25 +798,20 @@ function draw() {
                             .join("\n") +
                         "\nserver mem usage: " +
                         storedMem;
-                    netinfo = netinfo.split("\n").reverse();
-                    netinfo.forEach((line, index) => {
-                        ctx.font = font(16);
-                        ctx.lineWidth = 3;
-                        ctx.strokeStyle = "black";
-                        ctx.strokeText(
-                            line,
-                            w - ctx.measureText(line).width - 15,
-                            h - 15 - 16 * index
-                        );
-                        drawText(
-                            w - ctx.measureText(line).width - 15,
-                            h - 15 - 16 * index,
-                            line,
-                            "white",
-                            font(16),
-                            "left"
-                        );
-                    });
+                    drawText(
+                        w -
+                            15 -
+                            Math.max(
+                                ...netinfo
+                                    .split("\n")
+                                    .map((v) => ctx.measureText(v).width)
+                            ),
+                        h - 15 - (netinfo.split("\n").length + 3) * 21,
+                        netinfo,
+                        "white",
+                        font(16),
+                        "left"
+                    );
                 }
                 if (getKeyDown("keyi") && !messagemode) {
                     renderScale -= 0.1;
@@ -2893,7 +2888,7 @@ function drawHUD() {
         drawLine(w / 2, 0, w / 2, h, "blue", 2);
         drawLine(0, h / 2, w, h / 2, "blue", 2);
         if (navData.waypoints) {
-            ctx.drawImage(navCanvas, cameraOffsets[0], cameraOffsets[1]);
+            //ctx.drawImage(navCanvas, cameraOffsets[0], cameraOffsets[1]);
         }
     }
     //#endregion
