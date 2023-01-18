@@ -32,6 +32,8 @@ function updateOptScale() {
         canvas.height = window.innerWidth * (9 / 16);
     }
 
+    scale = 919 / canvas.height;
+
     properScale(canvas2);
     properScale(plyDrawCanvas);
     properScale(navCanvas);
@@ -43,6 +45,9 @@ function updateOptScale() {
 }
 
 updateOptScale();
+window.onresize = () => {
+    updateOptScale();
+};
 
 function sz(size) {
     var ref = refH();
