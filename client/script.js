@@ -1715,6 +1715,30 @@ var defGameState = {
 };
 var gameState = { ...defGameState };
 
+var ccodes = [
+    "#000000",
+    "#0000AA",
+    "#00AA00",
+    "#00AAAA",
+    "#AA0000",
+    "#AA00AA",
+    "#FFAA00",
+    "#AAAAAA",
+    "#555555",
+    "#5555FF",
+    "#55FF55",
+    "#55FFFF",
+    "#FF5555",
+    "#FF55FF",
+    "#FFFF55",
+    "#FFFFFF",
+];
+var textEscapeCode = /&[0-9a-fk-r]/g;
+
+function escape(text) {
+    return text.replace(textEscapeCode, "");
+}
+
 function drawText(
     x,
     y,
@@ -1733,17 +1757,62 @@ function drawText(
     var lineheight = parseInt(font) + 5;
     for (var i = 0; i < lines.length; i++) {
         if (!lines[i]) continue;
-        ctx.fillText(lines[i], x, y + i * lineheight);
-        ctx.strokeText(lines[i], x, y + i * lineheight);
+        var textData = {
+            color: col,
+            isBold: false,
+            isItalic: false,
+            isUnderline: false,
+        };
+        var matches = [];
+        while ((match = textEscapeCode.exec(lines[i])) != null) {
+            matches.push([match[0], match.index]);
+        }
+        lines[i] = lines[i].replace(textEscapeCode, "");
+        var lineWidth = align == "center" ? ctx.measureText(lines[i]).width : 0;
+        var xOffset = -lineWidth / 2;
+        lines[i].split("").forEach((letter, index) => {
+            var match = matches.find((m) => m[1] == index);
+            if (match) {
+                var matchCode = parseInt(match[0][1], 16);
+                textData.color = ccodes[matchCode];
+            }
+            var txtW = ctx.measureText(letter).width;
+            if (showNetInfo)
+                drawStrokedRect(
+                    x + xOffset,
+                    y +
+                        i * lineheight +
+                        (1 - ctx.measureText(letter).actualBoundingBoxAscent),
+                    txtW,
+                    ctx.measureText(letter).actualBoundingBoxAscent +
+                        ctx.measureText(letter).actualBoundingBoxDescent,
+                    "red",
+                    1
+                );
+            ctx.lineWidth = 0.01;
+            ctx.fillStyle = textData.color;
+            ctx.fillText(
+                letter,
+                x + xOffset + (align == "center" ? txtW / 2 : 0),
+                y + i * lineheight
+            );
+            ctx.strokeText(
+                letter,
+                x + xOffset + (align == "center" ? txtW / 2 : 0),
+                y + i * lineheight
+            );
+            xOffset += txtW;
+        });
     }
 }
 
 function wrap(text, width) {
     function txtW(txt) {
-        return ctx.measureText(txt).width;
+        return ctx.measureText(escape(txt)).width;
     }
     var lines = [];
     var curLine = [];
+
     text.split(" ").forEach((word) => {
         if (txtW(curLine.join(" ")) > width) {
             lines.push(curLine.join(" "));
@@ -2326,7 +2395,7 @@ function drawHUD() {
         } else {
             var text = "click here to respawn";
             drawText(9999, 9999, "", "black", font(36), "left");
-            var textWidth = ctx.measureText(text).width;
+            var textWidth = ctx.measureText(escape(text)).width;
             var boxWidth = textWidth + 10;
             roundRect(
                 w / 2 - boxWidth / 2,
@@ -2450,7 +2519,12 @@ function drawHUD() {
             "left"
         );
         var textWidth = ctx.measureText(
-            (username && !messagemode ? username : typing).slice(0, cursorPos)
+            escape(
+                (username && !messagemode ? username : typing).slice(
+                    0,
+                    cursorPos
+                )
+            )
         ).width;
         if (messagemode) {
             var curX = w / 2 - 500 / 2 + 5 + textWidth + 2;
@@ -2508,7 +2582,7 @@ function drawHUD() {
         });
         var text = "Join!";
         drawText(9999, 9999, "", "black", font(52), "left");
-        var textWidth = ctx.measureText(text).width;
+        var textWidth = ctx.measureText(escape(text)).width;
         var boxWidth = textWidth + 10;
         roundRect(
             w / 2 - boxWidth / 2 + (w / 4) * 1.5,
@@ -2536,7 +2610,7 @@ function drawHUD() {
     var secondsLeft = timerDate.getSeconds().toString().padStart(2, "0");
     var text = `${minutesLeft}:${secondsLeft}`;
     ctx.font = font(56);
-    var textWidth = ctx.measureText(text).width;
+    var textWidth = ctx.measureText(escape(text)).width;
     roundRect(
         w / 2 -
             (textWidth + 10) / 2 +
@@ -2751,8 +2825,8 @@ function drawHUD() {
         if (messagemode) {
             var writeStr = `${typing}`;
             ctx.font = font(chatFontSize);
-            if (ctx.measureText(writeStr).width > 300) {
-                while (ctx.measureText(writeStr).width > 300) {
+            if (ctx.measureText(text).width > 300) {
+                while (ctx.measureText(text).width > 300) {
                     writeStr = writeStr.substring(1);
                 }
             }
@@ -2775,7 +2849,7 @@ function drawHUD() {
             })
             .join("\n");
         ctx.font = font(chatFontSize);
-        var chatTextWrapped = wrap(chatText, 250);
+        var chatTextWrapped = wrap(chatText, 275);
         if (chatTextWrapped.split("\n").length > charsVert) {
             chatTextWrapped = chatTextWrapped
                 .split("\n")

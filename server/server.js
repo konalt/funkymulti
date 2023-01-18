@@ -2106,6 +2106,13 @@ io.on("connection", (socket) => {
                 });
             }
             return;
+        } else if (msg.startsWith("!chattest")) {
+            io.emit("recieve_message", {
+                author: "ServerBot",
+                content:
+                    "&cp&6i&eg&ao&9n &5i&cs &ef&aa&9t&bt&5e&cs&6t &aw&9h&be&5n &6h&ee &9e&ba&5t&cs &em&aa&9n&by &cs&6e&ee&ad&9s",
+            });
+            return;
         }
         var newContent = flaps.onMessage({
             author: usernames[socket.id]
