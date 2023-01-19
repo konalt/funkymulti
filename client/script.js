@@ -1335,7 +1335,7 @@ function drawPlayer(ply, self, name, transparent = false) {
         60,
         60
     );
-    //if (self) drawStrokedRect((ply.x - 30), (ply.y - 30), (60), (60), "red", (2));
+    if (showNetInfo) drawStrokedRect(ply.x - 30, ply.y - 30, 60, 60, "red", 2);
     if (getWeaponData(ply.weapon).hands) {
         var handLeft = hands[0];
         var handRight = hands[1];
@@ -1821,7 +1821,7 @@ function drawText(
                 textData.color = ccodes[matchCode];
             }
             var txtW = ctx.measureText(letter).width;
-            if (showNetInfo)
+            /* if (showNetInfo)
                 drawStrokedRect(
                     x + xOffset,
                     y +
@@ -1832,7 +1832,7 @@ function drawText(
                         ctx.measureText(letter).actualBoundingBoxDescent,
                     "red",
                     1
-                );
+                ); */
             ctx.lineWidth = 0.01;
             ctx.fillStyle = textData.color;
             ctx.fillText(
