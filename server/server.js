@@ -3439,14 +3439,15 @@ function getClosestPlayer(pos) {
     });
     return cls;
 }
-function getClosestWaypoint(pos) {
+function getClosestWaypoint(pos, set = navData.waypoints, exclude = []) {
     var cls = null;
-    navData.waypoints.forEach((ply) => {
+    set.forEach((ply) => {
         if (!cls) return (cls = ply);
+        if (exclude.includes(ply.id)) return;
         if (
             distance(pos.x, pos.y, ply.x, ply.y) <
                 distance(pos.x, pos.y, cls.x, cls.y) &&
-            distance(pos.x, pos.y, ply.x, ply.y) != 0
+            distance(pos.x, pos.y, ply.x, ply.y) > 15
         )
             cls = ply;
     });
@@ -3458,6 +3459,8 @@ function bdInit(bd) {
     bd.pathing = {};
     bd.pathing.last = null;
     bd.pathing.next = null;
+    bd.pathing.final = null;
+    bd.pathing.visited = [];
     bd.init = true;
     return bd;
 }
@@ -3479,12 +3482,38 @@ function doBotAI(bot, botname) {
     }
     var closestPlayer = getClosestPlayer(bot);
     if (!closestPlayer) return;
+    bd.pathing.final = getClosestWaypoint(closestPlayer);
+    if (bd.pathing.next)
+        console.log(
+            distance(bd.pathing.next.x, bd.pathing.next.y, bot.x, bot.y),
+            bd.pathing.next
+        );
     if (!bd.pathing.next) {
         var closestWaypoint = getClosestWaypoint(bot);
         bd.pathing.next = closestWaypoint;
     } else {
+        if (distance(bd.pathing.next.x, bd.pathing.next.y, bot.x, bot.y) < 15) {
+            if (bd.pathing.next.id == bd.pathing.final.id) {
+                bd.pathing.visited = [];
+            }
+            bd.pathing.visited.push(bd.pathing.next.id);
+            var closestWaypoint = getClosestWaypoint(
+                bot,
+                bd.pathing.next.conns.map((w) =>
+                    navData.waypoints.find((i) => i.id == w)
+                ),
+                bd.pathing.visited
+            );
+            console.log(closestWaypoint);
+            bd.pathing.last = JSON.parse(JSON.stringify(bd.pathing.next));
+            bd.pathing.next = closestWaypoint;
+        }
         var vec = getVector(bd.pathing.next.x, bd.pathing.next.y, bot.x, bot.y);
-        var t = 0;
+        var t = 1;
+        bot.u = false;
+        bot.l = false;
+        bot.d = false;
+        bot.r = false;
         if (vec[0] > t) bot.r = true;
         if (vec[0] < -t) bot.l = true;
         if (vec[1] > t) bot.d = true;
