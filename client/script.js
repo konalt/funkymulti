@@ -806,20 +806,7 @@ function draw() {
                         "\nserver mem usage: " +
                         storedMem;
                     ctx.font = font(16);
-                    drawText(
-                        w -
-                            15 -
-                            Math.max(
-                                ...netinfo
-                                    .split("\n")
-                                    .map((v) => ctx.measureText(v).width)
-                            ),
-                        h - 15 - (netinfo.split("\n").length - 1) * 21,
-                        netinfo,
-                        "white",
-                        font(16),
-                        "left"
-                    );
+                    drawText(15, 15 + 10, netinfo, "white", font(16), "left");
                     navData.waypoints.forEach((wpt) => {
                         drawText(
                             wpt.x + cameraOffsets[0],
