@@ -3439,10 +3439,57 @@ function getClosestPlayer(pos) {
     });
     return cls;
 }
+function getClosestWaypoint(pos) {
+    var cls = null;
+    navData.waypoints.forEach((ply) => {
+        if (!cls) return (cls = ply);
+        if (
+            distance(pos.x, pos.y, ply.x, ply.y) <
+                distance(pos.x, pos.y, cls.x, cls.y) &&
+            distance(pos.x, pos.y, ply.x, ply.y) != 0
+        )
+            cls = ply;
+    });
+    return cls;
+}
+
+function bdInit(bd) {
+    bd = {};
+    bd.pathing = {};
+    bd.pathing.last = null;
+    bd.pathing.next = null;
+    bd.init = true;
+    return bd;
+}
+
+function getVector(destX, destY, playerX, playerY) {
+    var x = destX - playerX;
+    var y = destY - playerY;
+    var l = Math.sqrt(x * x + y * y);
+    x = x / l;
+    y = y / l;
+    return [x * 10, y * 10];
+}
 
 function doBotAI(bot, botname) {
+    var bd = botData[botname];
+    if (!bd) {
+        botData[botname] = bdInit({});
+        bd = botData[botname];
+    }
     var closestPlayer = getClosestPlayer(bot);
     if (!closestPlayer) return;
+    if (!bd.pathing.next) {
+        var closestWaypoint = getClosestWaypoint(bot);
+        bd.pathing.next = closestWaypoint;
+    } else {
+        var vec = getVector(bd.pathing.next.x, bd.pathing.next.y, bot.x, bot.y);
+        var t = 0;
+        if (vec[0] > t) bot.r = true;
+        if (vec[0] < -t) bot.l = true;
+        if (vec[1] > t) bot.d = true;
+        if (vec[1] < -t) bot.u = true;
+    }
     bot.a = getAngleArbitrary(closestPlayer.x, closestPlayer.y, bot.x, bot.y);
 }
 
@@ -3474,7 +3521,7 @@ function loadWaypoints(mapname) {
                 return wpt;
             });
         }
-        //navAutoFindConns(wpts);
+        navAutoFindConns(wpts);
         navData.waypoints = wpts;
         //navAutoFindRoutes(wpts);
         return wpts;

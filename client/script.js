@@ -827,6 +827,19 @@ function draw() {
                             font(24),
                             "center"
                         );
+                        wpt.conns.forEach((id) => {
+                            var wpt2 = navData.waypoints.find(
+                                (x) => x.id == id
+                            );
+                            drawLine(
+                                wpt.x + cameraOffsets[0],
+                                wpt.y + cameraOffsets[1],
+                                wpt2.x + cameraOffsets[0],
+                                wpt2.y + cameraOffsets[1],
+                                "lime",
+                                2
+                            );
+                        });
                     });
                 }
                 if (getKeyDown("keyi") && !messagemode) {
