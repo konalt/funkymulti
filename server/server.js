@@ -5,8 +5,6 @@ const https = require("https");
 const sio = require("socket.io");
 const express = require("express");
 const flaps = require("./plugins/flaps");
-const { debuglog } = require("util");
-const { strict } = require("assert");
 
 // HTTPS certificates
 const options = {
@@ -2118,6 +2116,26 @@ io.on("connection", (socket) => {
                     "&cp&6i&eg&ao&9n &5i&cs &ef&aa&9t&bt&5e&cs&6t &aw&9h&be&5n &6h&ee &9e&ba&5t&cs &em&aa&9n&by &cs&6e&ee&ad&9s",
             });
             return;
+        } else if (msg.startsWith("!route")) {
+            var r = getRoutes(
+                getWptFromId(parseInt(msg.split(" ")[1])),
+                getWptFromId(parseInt(msg.split(" ")[2]))
+            );
+            io.emit("recieve_message", {
+                author: "ServerBot",
+                content: r.join(" "),
+            });
+            return;
+        } else if (msg.startsWith("!waytp")) {
+            var wpt = getWptFromId(parseInt(msg.split(" ")[1]));
+            gameState.players[socket.id].x = wpt.x;
+            gameState.players[socket.id].y = wpt.y;
+            io.emit("recieve_message", {
+                author: "ServerBot",
+                content:
+                    "Teleported to waypoint " + parseInt(msg.split(" ")[1]),
+            });
+            return;
         }
         var newContent = flaps.onMessage({
             author: usernames[socket.id]
@@ -3465,7 +3483,7 @@ function bdInit(bd) {
     bd.pathing.last = null;
     bd.pathing.next = null;
     bd.pathing.final = null;
-    bd.pathing.visited = [];
+    bd.pathing.route = [];
     bd.init = true;
     return bd;
 }
@@ -3479,6 +3497,24 @@ function getVector(destX, destY, playerX, playerY) {
     return [x * 10, y * 10];
 }
 
+function getRoutes(source, dest) {
+    function walk(wpt, orig, vis = [source.id], first = true) {
+        var routes = [];
+        if (wpt.conns.includes(dest.id)) {
+            vis.push(dest.id);
+            return vis;
+        }
+        wpt.conns.forEach((element) => {
+            if (vis.includes(element)) return;
+            vis.push(element);
+            routes.push(walk(getWptFromId(element), wpt, vis, false));
+        });
+        return vis;
+    }
+    var o = walk(source, source);
+    return o;
+}
+
 function doBotAI(bot, botname) {
     var bd = botData[botname];
     if (!bd) {
@@ -3488,33 +3524,21 @@ function doBotAI(bot, botname) {
     var closestPlayer = getClosestPlayer(bot);
     if (!closestPlayer) return;
     bd.pathing.final = getClosestWaypoint(closestPlayer);
-    if (bd.pathing.next)
-        console.log(
-            distance(bd.pathing.next.x, bd.pathing.next.y, bot.x, bot.y),
-            bd.pathing.next
-        );
     if (!bd.pathing.next) {
         var closestWaypoint = getClosestWaypoint(bot);
         bd.pathing.next = closestWaypoint;
     } else {
         if (distance(bd.pathing.next.x, bd.pathing.next.y, bot.x, bot.y) < 15) {
-            if (bd.pathing.next.id == bd.pathing.final.id) {
-                bd.pathing.visited = [];
+            if (!bd.pathing.route[0]) {
+                bd.pathing.route = getRoutes(
+                    getClosestWaypoint(bot),
+                    getClosestWaypoint(closestPlayer)
+                );
             }
-            bd.pathing.visited.push(bd.pathing.next.id);
-            var closestWaypoint = getClosestWaypoint(
-                bot,
-                bd.pathing.next.conns.map((w) =>
-                    navData.waypoints.find((i) => i.id == w)
-                ),
-                bd.pathing.visited
-            );
-            console.log(closestWaypoint);
-            bd.pathing.last = JSON.parse(JSON.stringify(bd.pathing.next));
-            bd.pathing.next = closestWaypoint;
+            bd.pathing.next = getWptFromId(bd.pathing.route.shift());
         }
         var vec = getVector(bd.pathing.next.x, bd.pathing.next.y, bot.x, bot.y);
-        var t = 1;
+        var t = 0;
         bot.u = false;
         bot.l = false;
         bot.d = false;
@@ -3523,6 +3547,20 @@ function doBotAI(bot, botname) {
         if (vec[0] < -t) bot.l = true;
         if (vec[1] > t) bot.d = true;
         if (vec[1] < -t) bot.u = true;
+        bot.spr = true;
+        var hit = botBulletWillHitWall(
+            bot,
+            [closestPlayer.x, closestPlayer.y, bot.x, bot.y],
+            closestPlayer
+        );
+        if (!hit && bot.canFire) {
+            shootSound(bot.weapon, botname);
+            useWeapon(
+                getWeaponData(bot.weapon),
+                [botname, bot],
+                [closestPlayer.x, closestPlayer.y, bot.x, bot.y]
+            );
+        }
     }
     bot.a = getAngleArbitrary(closestPlayer.x, closestPlayer.y, bot.x, bot.y);
 }
