@@ -406,6 +406,8 @@ function draw() {
                 );
             } else {
                 var lp = gameState.players[socket.id];
+                if (lp.isTyping != messagemode)
+                    socket.emit("typing", messagemode);
                 if (forceEnableCamera) {
                     enableCamera = true;
                 } else {
@@ -1049,6 +1051,7 @@ function parsePlayerData(plyd) {
             isMouseDown: db(ply[26]),
             lastKiller: ply[27],
             hexColor: ply[28],
+            isTyping: db(ply[29]),
         };
     });
     return final;
@@ -1412,13 +1415,36 @@ function drawPlayer(ply, self, name, transparent = false) {
     if (!self) {
         drawText(
             ply.x + cameraOffsets[0],
-            ply.y - 35 - 10 + cameraOffsets[1],
+            ply.y - 35 - 10 - 10 + cameraOffsets[1],
             name,
             "white",
             font(20),
             "center",
             usableContext
         );
+    }
+    if (ply.isTyping) {
+        var minAlpha = 0.2;
+        var maxAlpha = 0.75;
+        var spd = 0.5;
+        var alphas = [0, -2, -4].map((x) =>
+            Math.max(
+                Math.min(Math.sin(serverTime() * spd * 0.01 + x), maxAlpha),
+                minAlpha
+            )
+        );
+        var circSize = 5;
+        alphas.forEach((a, i) => {
+            drawCirc(
+                ply.x -
+                    alphas.length * circSize +
+                    i * (circSize + 10) +
+                    cameraOffsets[0],
+                ply.y - 35 - 10 - 10 - 20 - 5 + cameraOffsets[1],
+                circSize,
+                "rgba(255,255,255," + a + ")"
+            );
+        });
     }
     if (transparent) {
         ctx.globalAlpha = 0.2;
@@ -1665,6 +1691,7 @@ var defGameState = {
             loadout: [-1, -1, -1, -1],
             lastKiller: "error",
             hexColor: localStorage.getItem("funkymulti_hexcode") || "None",
+            isTyping: false,
         },
     },
     map: {

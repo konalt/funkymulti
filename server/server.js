@@ -471,7 +471,9 @@ function encodePlayerData(plyd) {
             ply[1].lastAttack
         }:${JSON.stringify(ply[1].loadout)}:${ply[1].lastHand}:${
             ply[1].isMouseDown ? "1" : "0"
-        }:${ply[1].lastKiller}:${ply[1].hexColor}`;
+        }:${ply[1].lastKiller}:${ply[1].hexColor}:${
+            ply[1].isTyping ? "1" : "0"
+        }`;
     });
     return final;
 }
@@ -1913,6 +1915,9 @@ io.on("connection", (socket) => {
     socket.on("set_color", (hex) => {
         ply.hexColor = hex;
         checkJoinOK();
+    });
+    socket.on("typing", (bool) => {
+        ply.isTyping = bool;
     });
     socket.on("respawn", () => {
         if (gameIsEnding) return;
