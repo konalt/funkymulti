@@ -2927,6 +2927,27 @@ function drawHUD() {
     //#endregion
     //#region Navmesh
     if (showNetInfo) {
+        var hue = 0;
+        var sides = 360;
+        forEachInShape(
+            (x, y, n) => {
+                hue += 360 / sides;
+                var p = getBulletHitWallPos([ply.x, ply.y, x, y]);
+                if (!p) return;
+                drawLine(
+                    ply.x + cameraOffsets[0],
+                    ply.y + cameraOffsets[1],
+                    p[0] + cameraOffsets[0],
+                    p[1] + cameraOffsets[1],
+                    "white",
+                    1
+                );
+            },
+            ply.x,
+            ply.y,
+            sides,
+            1
+        );
         drawStrokedRect(
             gameState.players[socket.id].x + cameraOffsets[0] - 1633 / 2,
             gameState.players[socket.id].y + cameraOffsets[1] - 919 / 2,
@@ -2935,13 +2956,87 @@ function drawHUD() {
             "red",
             5
         );
-        drawLine(w / 2, 0, w / 2, h, "blue", 2);
-        drawLine(0, h / 2, w, h / 2, "blue", 2);
+        /* drawLine(w / 2, 0, w / 2, h, "blue", 2);
+        drawLine(0, h / 2, w, h / 2, "blue", 2); */
         if (navData.waypoints) {
             //ctx.drawImage(navCanvas, cameraOffsets[0], cameraOffsets[1]);
         }
     }
     //#endregion
+}
+
+function forEachInShape(fn, x, y, n_sides, size) {
+    var a = (2 * Math.PI) / n_sides;
+    for (var i = 0; i < n_sides; i++) {
+        fn(x + size * Math.cos(a * i), y + size * Math.sin(a * i), i);
+    }
+}
+
+function getBulletHitWallPos(md) {
+    var mx = md[0];
+    var my = md[1];
+    var px = md[2];
+    var py = md[3];
+    var bullet = {
+        x: 0,
+        y: 0,
+        dx: 0,
+        dy: 0,
+    };
+    var x = mx - px;
+    var y = my - py;
+    var l = Math.sqrt(x * x + y * y);
+    x = x / l;
+    y = y / l;
+    bullet.x = px;
+    bullet.y = py;
+    bullet.dx = x * 20;
+    bullet.dy = y * 20;
+    var hit = null;
+    var done = false;
+    var t = 0;
+    while (!done) {
+        t++;
+        if (t > 500) {
+            done = true;
+        }
+        bullet.x += bullet.dx;
+        bullet.y += bullet.dy;
+        if (!isSafeBulletPos(bullet)) {
+            hit = [bullet.x, bullet.y];
+            done = true;
+        }
+    }
+    return hit;
+}
+
+function isSafeBulletPos(ply) {
+    var ret = true;
+    if (ply.x < -gameState.map.width) ret = false;
+    if (ply.x > gameState.map.width * 2) ret = false;
+    if (ply.y < -gameState.map.height) ret = false;
+    if (ply.y > gameState.map.height * 2) ret = false;
+    gameState.map.colliding.forEach((obj) => {
+        if (!ret || obj.playerclip) return;
+        switch (obj.type) {
+            case "roundrect":
+            case "rect":
+                var rectA = { x: ply.x - 1, y: ply.y - 1, w: 2, h: 2 };
+                var rectB = { x: obj.x1, y: obj.y1, w: obj.x2, h: obj.y2 };
+                var xOverlap =
+                    valueInRange(rectA.x, rectB.x, rectB.x + rectB.w) ||
+                    valueInRange(rectB.x, rectA.x, rectA.x + rectA.w);
+                var yOverlap =
+                    valueInRange(rectA.y, rectB.y, rectB.y + rectB.h) ||
+                    valueInRange(rectB.y, rectA.y, rectA.y + rectA.h);
+                ret = !(yOverlap && xOverlap);
+                break;
+            case "circ":
+                ret = distance(ply.x, ply.y, obj.x1, obj.y1) > obj.r * 3;
+                break;
+        }
+    });
+    return ret;
 }
 
 var navRoute = [];
