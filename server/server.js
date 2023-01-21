@@ -2686,7 +2686,7 @@ function loadMap(mapname) {
             OOBCol: map.outofbounds,
             Name: map.name,
             BGCol: map.background,
-            __FORCE_DISABLE_SPLIT_OPTIMIZATION: false,
+            __FORCE_DISABLE_SPLIT_OPTIMIZATION: true,
         };
         data.split("\r\n").forEach((line, num) => {
             var lineData = line.split(" ");
@@ -2700,6 +2700,7 @@ function loadMap(mapname) {
             var collides = false;
             var destructible = false;
             var playerclip = false;
+            var bloom = 0;
             if (lineData[0].startsWith("layer2-")) {
                 layer2 = true;
                 lineData[0] = lineData[0].substring("layer2-".length);
@@ -2715,6 +2716,10 @@ function loadMap(mapname) {
             if (lineData[0].startsWith("destroy-")) {
                 destructible = true;
                 lineData[0] = lineData[0].substring("destroy-".length);
+            }
+            if (lineData[0].startsWith("bloom")) {
+                bloom = parseFloat(lineData[0].split("-")[0].split(":")[1]);
+                lineData[0] = lineData[0].split("-")[1];
             }
             var obj;
             var secobjs = [];
@@ -3166,6 +3171,7 @@ function loadMap(mapname) {
                     playerclip: playerclip,
                     disableSplitting:
                         vars["__FORCE_DISABLE_SPLIT_OPTIMIZATION"] == 1,
+                    bloom: bloom,
                 };
             } else if (lineData[0] == "strokerect") {
                 obj = {

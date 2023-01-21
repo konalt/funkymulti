@@ -2100,6 +2100,10 @@ function drawMap(map, layer2) {
             !shouldDraw(obj)
         )
             return;
+        if (obj.bloom) {
+            ctx.shadowBlur = obj.bloom || 1;
+            ctx.shadowColor = obj.col;
+        }
         switch (obj.type) {
             case "line":
                 drawLine(
@@ -2230,6 +2234,9 @@ function drawMap(map, layer2) {
                         ")"
                 );
                 break;
+        }
+        if (obj.bloom) {
+            ctx.shadowBlur = 0;
         }
     });
     if (!layer2 && map.grid) {
