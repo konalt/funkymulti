@@ -3715,7 +3715,6 @@ function loadWaypoints(mapname) {
         return wpts;
     } catch (e) {
         console.log("Unable to load navfile " + mapname);
-        console.log(e);
     }
 }
 
