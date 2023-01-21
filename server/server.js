@@ -1041,7 +1041,10 @@ function tick() {
             var destroyed = false;
             var decal = true;
             for (let i = 0; i < steps; i++) {
-                var ricochet = Math.random() * 100 < opt.bullet_ricochet_chance;
+                var ricochet =
+                    Math.random() * 100 < opt.bullet_ricochet_chance &&
+                    getCollidedObject(bullet) &&
+                    getCollidedObject(bullet).destructible;
                 if (destroyed) continue;
                 if (!opt.bullet_ricochet_alt) {
                     bullet.x +=
