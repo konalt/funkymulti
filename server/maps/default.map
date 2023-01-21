@@ -4,7 +4,7 @@ height 919
 camera 1
 background #aae5a4
 --
-collides-destroy-circ 800 450 30 #ff0000 5 #TestCirc
+collides-circ 800 450 30 #ff0000 5 #TestCirc
 line 30 30 70 70 #0000ff 5
 --
 spawnpoint 100 100
