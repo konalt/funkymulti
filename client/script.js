@@ -809,6 +809,9 @@ function draw() {
                 if (gameState.russkiyPlane.isActive) {
                     drawRussianPlane();
                 }
+                if (lp.isDead || lp.isSelectingPrimary) {
+                    ctx._blurRect(0, 0, w, h, 1 / 32);
+                }
                 drawHUD();
                 if (showNetInfo && gameState.players[socket.id]) {
                     fps = Math.round(1000 / (Date.now() - lastFpsTime));
