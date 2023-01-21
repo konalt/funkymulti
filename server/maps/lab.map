@@ -1,8 +1,10 @@
 name Tek-Lab
 width 1633
 height 919
-camera 0
+camera 1
 background #808080
+outofbounds black
+bglayer2 1
 --
 collides-rect 0 320 150 55 #404040 #GM_Wall_South_1
 collides-rect 240 320 250 55 #404040 #GM_Wall_South_2
