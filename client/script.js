@@ -1465,18 +1465,18 @@ function drawPlayer(ply, self, name, transparent = false) {
 
 function drawBullet(bul) {
     ctx.shadowBlur = 5;
-    ctx.shadowColor = "#fffbd4";
+    ctx.shadowColor = "#fffac7";
     var ang = getAngleArbitrary(bul.x, bul.y, bul.lastPosX, bul.lastPosY);
     ctx.translate(bul.x + cameraOffsets[0], bul.y + cameraOffsets[1]);
     ctx.rotate((ang * Math.PI) / 180);
     ctx.translate(-(bul.x + cameraOffsets[0]), -(bul.y + cameraOffsets[1]));
-    ctx.lineCap = "round";
+    ctx.lineCap = "butt";
     drawLine(
         bul.x + cameraOffsets[0],
         bul.y + cameraOffsets[1],
         bul.x + cameraOffsets[0] - 20,
         bul.y + cameraOffsets[1],
-        "white",
+        "#fffbd4",
         5
     );
     ctx.lineCap = "butt";
