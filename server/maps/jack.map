@@ -1,0 +1,70 @@
+-- Metadata
+name Jack's Hideout
+width 2048
+height 1024
+camera 1
+background #A0A0A0
+outofbounds #A0A0A0
+-- Variables
+var r rect
+var c collides-rect
+var p playerclip-rect
+var w ent window
+var asphalt #3D3D3D
+var roadpaint #EAEAEA
+var pavement #A0A0A0
+var barfloor #7A4500
+var bardesk #AF7528
+var ceramic #BC6464
+var grass #00B515
+var wall #808080
+var wdark #787878
+var transparent rgba(0,0,0,0)
+-- Disable split optimization
+var __FORCE_DISABLE_SPLIT_OPTIMIZATION 1
+var __RECT_SIZER_INFO 19,22,25
+-- Map
+--
+-- Asphalt
+$r 0 610 879 414 $asphalt
+-- Road paint
+$r 23 794 173 45 $roadpaint
+$r 242 794 148 45 $roadpaint
+$r 731 794 89 46 $roadpaint
+-- Car
+$p 370 745 368 185 $transparent
+$c 473 745 179 185 $transparent
+$r 401 750 48 175 #000000
+$r 672 752 48 175 #000000
+$r 370 756 368 164 #A8A8A8
+$r 650 776 88 129 #9C9C9C
+$r 473 745 179 185 #5B5B5B
+-- Floors
+$r 9 9 664 351 $ceramic
+$r 644 0 977 464 $barfloor
+$r 1395 380 226 233 $barfloor
+$r 1621 0 427 348 $grass
+-- Windows
+$w 456 338 102
+$w 793 461 113
+$w 1428 604 174
+$w 1612 127 114 v
+-- Walls
+$c 0 0 23 360 $wall
+$c 0 0 1632 23 $wall
+$c 1612 0 23 129 $wall
+$c 1612 239 20 492 $wall
+$c 0 338 174 24 $wall
+$c 278 338 179 24 $wall
+$c 555 338 98 24 $wall
+$c 632 234 21 246 $wall
+$c 632 461 163 19 $wall
+$c 904 461 271 19 $wall
+$c 1328 461 79 19 $wall
+$c 1388 461 19 162 $wall
+$c 1388 604 42 19 $wall
+$c 1600 604 32 19 $wall
+$c 632 0 23 123 $wall
+-- Bar desk
+$p 1276 22 58 137 $bardesk
+$p 812 97 522 62 $bardesk

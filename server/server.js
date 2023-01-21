@@ -2634,7 +2634,7 @@ function getWeaponData(wt) {
 }
 
 function rsize(inf, n) {
-    var ns = inf.split(",").map(parseInt);
+    var ns = inf.split(",").map((n) => parseInt(n));
     if (n >= ns[0] && n <= ns[2]) {
         console.log("Resized!");
         return ns[1];
@@ -2649,12 +2649,17 @@ function loadMap(mapname) {
         function bParse(str) {
             if (str.startsWith("$")) {
                 return vars[str.substring(1)] ? vars[str.substring(1)] : 0;
-            } else
-                return parseInt(str).toString() == str
-                    ? vars["__RECT_SIZER_INFO"]
-                        ? rsize(vars["__RECT_SIZER_INFO"], parseInt(str))
-                        : parseInt(str)
-                    : str;
+            } else {
+                if (parseInt(str).toString() == str) {
+                    if (vars["__RECT_SIZER_INFO"]) {
+                        return rsize(vars["__RECT_SIZER_INFO"], parseInt(str));
+                    } else {
+                        return parseInt(str);
+                    }
+                } else {
+                    return str;
+                }
+            }
         }
         var map = {
             name: "unknown",
