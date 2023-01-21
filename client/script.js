@@ -828,29 +828,31 @@ function draw() {
                         storedMem;
                     ctx.font = font(16);
                     drawText(15, 15 + 10, netinfo, "white", font(16), "left");
-                    navData.waypoints.forEach((wpt) => {
-                        drawText(
-                            wpt.x + cameraOffsets[0],
-                            wpt.y + cameraOffsets[1],
-                            wpt.id,
-                            "red",
-                            font(24),
-                            "center"
-                        );
-                        wpt.conns.forEach((id) => {
-                            var wpt2 = navData.waypoints.find(
-                                (x) => x.id == id
-                            );
-                            drawLine(
+                    if (navData.waypoints) {
+                        navData.waypoints.forEach((wpt) => {
+                            drawText(
                                 wpt.x + cameraOffsets[0],
                                 wpt.y + cameraOffsets[1],
-                                wpt2.x + cameraOffsets[0],
-                                wpt2.y + cameraOffsets[1],
-                                "lime",
-                                2
+                                wpt.id,
+                                "red",
+                                font(24),
+                                "center"
                             );
+                            wpt.conns.forEach((id) => {
+                                var wpt2 = navData.waypoints.find(
+                                    (x) => x.id == id
+                                );
+                                drawLine(
+                                    wpt.x + cameraOffsets[0],
+                                    wpt.y + cameraOffsets[1],
+                                    wpt2.x + cameraOffsets[0],
+                                    wpt2.y + cameraOffsets[1],
+                                    "lime",
+                                    2
+                                );
+                            });
                         });
-                    });
+                    }
                 }
                 if (getKeyDown("keyi") && !messagemode) {
                     renderScale -= 0.1;
@@ -1474,7 +1476,7 @@ function drawBullet(bul) {
     drawLine(
         bul.x + cameraOffsets[0],
         bul.y + cameraOffsets[1],
-        bul.x + cameraOffsets[0] - 20,
+        bul.x + cameraOffsets[0] - 30,
         bul.y + cameraOffsets[1],
         "#fffbd4",
         5
