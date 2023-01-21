@@ -2282,7 +2282,7 @@ io.on("connection", (socket) => {
         console.log(socket.id + " has left");
         io.emit("recieve_message", {
             author: "___NONAME___",
-            content: usernames[socket.id] + " has left the game",
+            content: usernames[socket.id] + "&7 has left the game",
         });
         gameState.bullets = gameState.bullets.filter(
             (b) => b.owner != socket.id
