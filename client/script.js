@@ -10,6 +10,8 @@ var ctx = canvas2.getContext("2d");
 var ctx2 = canvas.getContext("2d");
 var _ctxref = ctx;
 
+var isFirefox = navigator.userAgent.toLowerCase().indexOf("firefox") > -1;
+
 var optscale = 1;
 var params = new URLSearchParams(window.location.search);
 if (params.get("viewportscale")) {
@@ -832,7 +834,7 @@ function draw() {
                     drawRussianPlane();
                 }
                 if (lp.isDead || lp.isSelectingPrimary) {
-                    ctx._blurRect(0, 0, w, h, 1 / 32);
+                    if (isFirefox) ctx._blurRect(0, 0, w, h, 1 / 32); // Other browsers use SHITTY METHODS!!!!
                 }
                 drawHUD();
                 if (showNetInfo && gameState.players[socket.id]) {
