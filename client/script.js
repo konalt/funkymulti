@@ -2423,6 +2423,7 @@ var hexColors = {
     Orange: "#ff7700",
     Yellow: "#ffe100",
     Lime: "#00ff00",
+    Green: "#009900",
     Aqua: "#00ffff",
     Blue: "#0000ff",
     Purple: "#8800ff",
