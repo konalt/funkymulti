@@ -1469,8 +1469,10 @@ function drawPlayer(ply, self, name, transparent = false) {
 }
 
 function drawBullet(bul) {
-    ctx.shadowBlur = 5;
-    ctx.shadowColor = "#fffac7";
+    var wepd = getWeaponData(bul.bultype);
+    if (!wepd) return;
+    ctx.shadowBlur = 5 * (wepd.bulletBloomMult || 1);
+    ctx.shadowColor = wepd.bulletColor || "#fffac7";
     var ang = getAngleArbitrary(bul.x, bul.y, bul.lastPosX, bul.lastPosY);
     ctx.translate(bul.x + cameraOffsets[0], bul.y + cameraOffsets[1]);
     ctx.rotate((ang * Math.PI) / 180);
@@ -1479,10 +1481,10 @@ function drawBullet(bul) {
     drawLine(
         bul.x + cameraOffsets[0],
         bul.y + cameraOffsets[1],
-        bul.x + cameraOffsets[0] - 30,
+        bul.x + cameraOffsets[0] - 30 * (wepd.bulletLengthMult || 1),
         bul.y + cameraOffsets[1],
-        "#fffbd4",
-        5
+        wepd.bulletColor || "#fffbd4",
+        5 * (wepd.bulletThicknessMult || 1)
     );
     ctx.lineCap = "butt";
     ctx.setTransform(1, 0, 0, 1, 0, 0);
