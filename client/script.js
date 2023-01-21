@@ -274,6 +274,15 @@ canvas.onmouseup = function (e) {
         return hk != "mouse1";
     });
 };
+canvas.onwheel = function (event) {
+    event.preventDefault();
+    if (event.deltaY < 0) {
+        justPressed.push("scrollup");
+    } else {
+        justPressed.push("scrolldown");
+    }
+};
+var curslot = 1;
 
 function getKey(key) {
     return heldKeys.includes(key.toLowerCase());
@@ -677,12 +686,25 @@ function draw() {
                 }
                 if (getKeyDown("digit2") && !messagemode) {
                     socket.emit("setweapon", lp.loadout[0]);
+                    curslot = 0;
                 }
                 if (getKeyDown("digit1") && !messagemode) {
                     socket.emit("setweapon", lp.loadout[1]);
+                    curslot = 1;
                 }
                 if (getKeyDown("digit3") && !messagemode) {
                     socket.emit("setweapon", lp.loadout[2]);
+                    curslot = 2;
+                }
+                if (getKeyDown("scrollup") && !messagemode) {
+                    curslot++;
+                    if (curslot > 2) curslot = 0;
+                    socket.emit("setweapon", lp.loadout[curslot]);
+                }
+                if (getKeyDown("scrolldown") && !messagemode) {
+                    curslot--;
+                    if (curslot < 0) curslot = 2;
+                    socket.emit("setweapon", lp.loadout[curslot]);
                 }
                 if (
                     (getKeyDown("keyq") || getKeyDown("keyv")) &&
@@ -857,7 +879,7 @@ function draw() {
                         });
                     }
                 }
-                if (getKeyDown("keyi") && !messagemode) {
+                /* if (getKeyDown("keyi") && !messagemode) {
                     renderScale -= 0.1;
                 }
                 if (getKeyDown("keyo") && !messagemode) {
@@ -881,7 +903,7 @@ function draw() {
                 if (getKeyDown("keyl") && !messagemode) {
                     optscale = 1;
                     updateOptScale();
-                }
+                } */
             }
             setCursorMode(thisFrameCursorMode, true);
             //drawText(0, h / 2, lastEv, "white", "33px sans-serif", "left");
@@ -2965,7 +2987,6 @@ function drawHUD() {
                 }${m.content}`;
             })
             .join("\n");
-        console.log(chatText);
         ctx.font = font(chatFontSize);
         var chatTextWrapped = wrap(chatText, 250);
         if (chatTextWrapped.split("\n").length > charsVert) {
