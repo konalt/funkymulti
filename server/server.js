@@ -1553,20 +1553,7 @@ function isSafePos(ply) {
                 ret = !(yOverlap && xOverlap);
                 break;
             case "circ":
-                var rectA = { x: ply.x - 30, y: ply.y - 30, w: 60, h: 60 };
-                var rectB = {
-                    x: obj.x1 - obj.r,
-                    y: obj.y1 - obj.r,
-                    w: obj.r * 2,
-                    h: obj.r * 2,
-                };
-                var xOverlap =
-                    valueInRange(rectA.x, rectB.x, rectB.x + rectB.w) ||
-                    valueInRange(rectB.x, rectA.x, rectA.x + rectA.w);
-                var yOverlap =
-                    valueInRange(rectA.y, rectB.y, rectB.y + rectB.h) ||
-                    valueInRange(rectB.y, rectA.y, rectA.y + rectA.h);
-                ret = !(yOverlap && xOverlap);
+                ret = distance(obj.x1, obj.y1, ply.x, ply.y) > obj.r + 30;
                 break;
         }
     });
@@ -1595,7 +1582,7 @@ function isSafeBulletPos(ply) {
                 ret = !(yOverlap && xOverlap);
                 break;
             case "circ":
-                ret = distance(ply.x, ply.y, obj.x1, obj.y1) > obj.r * 3;
+                ret = distance(obj.x1, obj.y1, ply.x, ply.y) > obj.r;
                 break;
         }
     });
@@ -1624,20 +1611,7 @@ function isSafeGrenadePos(ply) {
                 ret = !(yOverlap && xOverlap);
                 break;
             case "circ":
-                var rectA = { x: ply.x - 5, y: ply.y - 5, w: 10, h: 10 };
-                var rectB = {
-                    x: obj.x1 - obj.r,
-                    y: obj.y1 - obj.r,
-                    w: obj.r * 2,
-                    h: obj.r * 2,
-                };
-                var xOverlap =
-                    valueInRange(rectA.x, rectB.x, rectB.x + rectB.w) ||
-                    valueInRange(rectB.x, rectA.x, rectA.x + rectA.w);
-                var yOverlap =
-                    valueInRange(rectA.y, rectB.y, rectB.y + rectB.h) ||
-                    valueInRange(rectB.y, rectA.y, rectA.y + rectA.h);
-                ret = !(yOverlap && xOverlap);
+                ret = distance(obj.x1, obj.y1, ply.x, ply.y) > obj.r + 10;
                 break;
         }
     });
