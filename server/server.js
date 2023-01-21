@@ -316,6 +316,45 @@ var gameState = {
             id: "flamethrower",
         },
         {
+            name: "Full Auto Shotgun",
+            dmg: 5,
+            fireRate: 250,
+            isAutomatic: true,
+            draw: (ply, _ctx, cameraOffsets) => {
+                roundRect(
+                    ply.x + 30 - 5,
+                    ply.y - 5,
+                    70,
+                    10,
+                    5,
+                    "#2e2e2e",
+                    usableContext
+                );
+                strokeRoundRect(
+                    ply.x + 30 - 5,
+                    ply.y - 5,
+                    70,
+                    10,
+                    5,
+                    4,
+                    "black",
+                    usableContext
+                );
+            },
+            hands: [
+                [40, 10, true],
+                [80, -10],
+            ],
+            clipSize: 10,
+            reloadTime: 2000,
+            spread: 20,
+            bulletCount: 6,
+            moveMult: 1,
+            bulletSpeedMult: 0,
+            barrelLength: 70,
+            id: "fullautoshotgun",
+        },
+        {
             name: "__melee_fists",
             dmg: 20,
             fireRate: 180,
@@ -3232,6 +3271,9 @@ function shootSound(wep) {
             // do nothing, flamethrower has a different
             // sound method!
             break;
+        case "Full Auto Shotgun":
+            io.emit("sound", "fashotgun_shoot");
+            break;
         case "Sniper Rifle":
             io.emit("sound", "sniper_shoot");
             break;
@@ -3266,6 +3308,9 @@ function reloadSound(wep) {
             break;
         case "Sniper Rifle":
             io.emit("sound", "sniper_reload");
+            break;
+        case "Full Auto Shotgun":
+            io.emit("sound", "fashotgun_reload");
             break;
         default:
             if (getWeaponData(wep).name.startsWith("__melee_")) break;

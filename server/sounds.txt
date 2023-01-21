@@ -1,5 +1,7 @@
 ar_reload
 ar_shoot
+fashotgun_reload
+fashotgun_shoot
 flamethrower
 glass_break
 grenade_boom

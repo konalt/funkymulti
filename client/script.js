@@ -38,8 +38,8 @@ function updateOptScale() {
     properScale(plyDrawCanvas);
     properScale(navCanvas);
 
-    storedMouseX = storedMouseXUnscaled;
-    storedMouseY = storedMouseYUnscaled;
+    storedMouseX = storedMouseXUnscaled * scale;
+    storedMouseY = storedMouseYUnscaled * scale;
 
     chatFontSize = 18;
 }
@@ -2339,7 +2339,13 @@ socket.on("game_start", () => {
 
 var primaries = [
     ["Revolver", "Laser Pistol"],
-    ["M16 Rifle", "Double-Barrel\nShotgun", "Sniper Rifle", "Flamethrower"],
+    [
+        "M16 Rifle",
+        "Double-Barrel\nShotgun",
+        "Sniper Rifle",
+        "Flamethrower",
+        "Full Auto\nShotgun",
+    ],
     ["Fists", "Dual\nScrewdrivers"],
     ["Frag\nGrenade", "Smoke\nGrenade"],
 ];
@@ -2927,7 +2933,7 @@ function drawHUD() {
     //#endregion
     //#region Navmesh
     if (showNetInfo) {
-        var hue = 0;
+        /* var hue = 0;
         var sides = 360;
         forEachInShape(
             (x, y, n) => {
@@ -2947,7 +2953,7 @@ function drawHUD() {
             ply.y,
             sides,
             1
-        );
+        ); */
         drawStrokedRect(
             gameState.players[socket.id].x + cameraOffsets[0] - 1633 / 2,
             gameState.players[socket.id].y + cameraOffsets[1] - 919 / 2,
