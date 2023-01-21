@@ -784,6 +784,27 @@ function draw() {
                     grad.addColorStop(1, "rgba(0, 0, 0, 1)");
 
                     drawRect(0, 0, w, h, grad);
+                } else if (!lp.isDead) {
+                    ctx.scale(w / 100, h / 100);
+                    var holeSize = 0.5;
+                    var fadeSize = 0.3;
+                    var holePos = [50, 50];
+                    var grad = ctx.createRadialGradient(
+                        holePos[0],
+                        holePos[1],
+                        0,
+                        holePos[0],
+                        holePos[1],
+                        holeSize * 1.5 * 100
+                    );
+                    grad.addColorStop(holeSize, "rgba(0, 0, 0, 0)");
+                    grad.addColorStop(
+                        holeSize + fadeSize,
+                        "rgba(0, 0, 0, 0.7)"
+                    );
+                    grad.addColorStop(1, "rgba(0, 0, 0, 0.7)");
+                    drawRect(0, 0, 100, 100, grad);
+                    ctx.scale(100 / w, 100 / h);
                 }
                 if (gameState.russkiyPlane.isActive) {
                     drawRussianPlane();
