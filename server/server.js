@@ -2284,6 +2284,9 @@ io.on("connection", (socket) => {
             author: "___NONAME___",
             content: usernames[socket.id] + " has left the game",
         });
+        gameState.bullets = gameState.bullets.filter(
+            (b) => b.owner != socket.id
+        );
         gameState.players[socket.id] = undefined;
         delete gameState.players[socket.id];
         usernames[socket.id] = undefined;
