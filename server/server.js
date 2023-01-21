@@ -396,6 +396,64 @@ var gameState = {
             id: "fullautoshotgun",
         },
         {
+            name: "M249",
+            dmg: 20,
+            fireRate: 60000 / 500,
+            isAutomatic: true,
+            draw: (ply, _ctx, cameraOffsets) => {
+                roundRect(
+                    ply.x + 30 + 15,
+                    ply.y - 15,
+                    20,
+                    30,
+                    2.5,
+                    "#536e4b",
+                    usableContext
+                );
+                strokeRoundRect(
+                    ply.x + 30 + 15,
+                    ply.y - 15,
+                    20,
+                    30,
+                    2.5,
+                    5,
+                    "black",
+                    usableContext
+                );
+                roundRect(
+                    ply.x + 30 - 5,
+                    ply.y - 5,
+                    80,
+                    10,
+                    5,
+                    "#2e2e2e",
+                    usableContext
+                );
+                strokeRoundRect(
+                    ply.x + 30 - 5,
+                    ply.y - 5,
+                    80,
+                    10,
+                    5,
+                    4,
+                    "black",
+                    usableContext
+                );
+            },
+            hands: [
+                [40, 10, true],
+                [80, -10],
+            ],
+            clipSize: 200,
+            reloadTime: 5000,
+            spread: 5,
+            bulletCount: 1,
+            moveMult: 0.4,
+            bulletLengthMult: 1.25,
+            barrelLength: 80,
+            id: "m249",
+        },
+        {
             name: "__melee_fists",
             dmg: 20,
             fireRate: 180,
@@ -3348,6 +3406,9 @@ function shootSound(wep) {
         case "Full Auto Shotgun":
             io.emit("sound", "fashotgun_shoot");
             break;
+        case "M249":
+            io.emit("sound", "m249_shoot");
+            break;
         case "Sniper Rifle":
             io.emit("sound", "sniper_shoot");
             break;
@@ -3388,6 +3449,9 @@ function reloadSound(wep) {
             break;
         case "Full Auto Shotgun":
             io.emit("sound", "fashotgun_reload");
+            break;
+        case "M249":
+            io.emit("sound", "m249_reload");
             break;
         default:
             if (getWeaponData(wep).name.startsWith("__melee_")) break;

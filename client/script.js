@@ -2414,6 +2414,7 @@ var primaries = [
         "Sniper Rifle",
         "Flamethrower",
         "Full Auto\nShotgun",
+        "M249\nMachine Gun",
     ],
     ["Fists", "Dual\nScrewdrivers"],
     ["Frag\nGrenade", "Smoke\nGrenade", "Thermite\nGrenade"],

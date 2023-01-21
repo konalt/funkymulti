@@ -11,6 +11,8 @@ grenade_pin
 grenade_toss
 laser_reload
 laser_shoot
+m249_reload
+m249_shoot
 melee_fist
 revolver_reload
 revolver_shoot
