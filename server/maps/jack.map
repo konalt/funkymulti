@@ -18,7 +18,7 @@ var bardesk #AF7528
 var ceramic #BC6464
 var grass #00B515
 var wall #808080
-var wdark #787878
+var wdark #686868
 var transparent rgba(0,0,0,0)
 -- Disable split optimization
 var __FORCE_DISABLE_SPLIT_OPTIMIZATION 1
