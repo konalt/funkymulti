@@ -2365,7 +2365,7 @@ socket.on("game_start", () => {
 });
 
 var primaries = [
-    ["Revolver", "Laser Pistol"],
+    ["Revolver", "Laser Pistol", "Desert Eagle"],
     [
         "M16 Rifle",
         "Double-Barrel\nShotgun",

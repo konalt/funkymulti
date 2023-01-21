@@ -1,5 +1,7 @@
 ar_reload
 ar_shoot
+deagle_reload
+deagle_shoot
 fashotgun_reload
 fashotgun_shoot
 flamethrower

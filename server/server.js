@@ -137,6 +137,44 @@ var gameState = {
             id: "laser",
         },
         {
+            name: "Desert Eagle",
+            dmg: 20,
+            fireRate: 60000 / 400,
+            isAutomatic: false,
+            draw: (ply, _ctx, cameraOffsets) => {
+                roundRect(
+                    ply.x + 20,
+                    ply.y - 5,
+                    56,
+                    10,
+                    5,
+                    "#2e2e2e",
+                    usableContext
+                );
+                strokeRoundRect(
+                    ply.x + 20,
+                    ply.y - 5,
+                    56,
+                    10,
+                    5,
+                    4,
+                    "black",
+                    usableContext
+                );
+            },
+            hands: [
+                [40, 10],
+                [900, 900, true],
+            ],
+            clipSize: 7,
+            reloadTime: 2000,
+            spread: 5,
+            bulletCount: 1,
+            moveMult: 1,
+            barrelLength: 46,
+            id: "deagle",
+        },
+        {
             name: "M16 Rifle",
             dmg: 10,
             fireRate: 60000 / 1200,
@@ -3300,6 +3338,9 @@ function shootSound(wep) {
         case "Laser Pistol":
             io.emit("sound", "laser_shoot");
             break;
+        case "Desert Eagle":
+            io.emit("sound", "deagle_shoot");
+            break;
         case "M16 Rifle":
             io.emit("sound", "ar_shoot");
             break;
@@ -3338,6 +3379,9 @@ function reloadSound(wep) {
             break;
         case "Laser Pistol":
             io.emit("sound", "laser_reload");
+            break;
+        case "Desert Eagle":
+            io.emit("sound", "deagle_reload");
             break;
         case "M16 Rifle":
             io.emit("sound", "ar_reload");
