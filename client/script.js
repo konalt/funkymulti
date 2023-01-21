@@ -2529,9 +2529,11 @@ function drawHUD() {
         );
 
         // the colors
-        var offsetX = w / 10;
-        var colorSize = 50;
-        var margin = 5;
+        ctx.font = font(56);
+        var offsetX = ctx.measureText("Player Colour").width / 2 + 15;
+        var offsetY = h / 2;
+        var colorSize = 75;
+        var margin = 7.5;
 
         var totalHeight =
             Object.values(hexColors).length * (colorSize + margin) - margin;
@@ -2543,40 +2545,67 @@ function drawHUD() {
             font(56),
             "center"
         );
-        Object.values(hexColors).forEach((color, i) => {
-            roundRect(
-                offsetX - colorSize / 2,
-                h / 2 - totalHeight / 2 + i * (colorSize + margin),
-                colorSize,
-                colorSize,
-                5,
-                color
-            );
-            if (ply.hexColor == color)
-                strokeRoundRect(
-                    offsetX - colorSize / 2,
-                    h / 2 - totalHeight / 2 + i * (colorSize + margin),
+        var xMax = 3;
+        var n = 0;
+        for (let y = 0; n < Object.values(hexColors).length; y++) {
+            var xm = Math.min(xMax, Object.values(hexColors).length - n);
+            for (let x = 0; x < xm; x++) {
+                if (!Object.values(hexColors)[n]) continue;
+                roundRect(
+                    offsetX -
+                        (xm / 2) * (colorSize + margin) +
+                        margin / 2 +
+                        x * (colorSize + margin),
+                    offsetY - totalHeight / 2 + y * (colorSize + margin) + 10,
                     colorSize,
                     colorSize,
-                    5,
-                    2.5,
-                    "white"
+                    colorSize * 0.1,
+                    Object.values(hexColors)[n]
                 );
-            if (
-                rectOverlap(storedMouseX, storedMouseY, {
-                    x: offsetX - colorSize / 2,
-                    y: h / 2 - totalHeight / 2 + i * (colorSize + margin),
-                    w: colorSize,
-                    h: colorSize,
-                })
-            ) {
-                if (getKeyDown("mouse1")) {
-                    socket.emit("set_color", color);
-                    localStorage.setItem("funkymulti_hexcode", color);
+                if (ply.hexColor == Object.values(hexColors)[n])
+                    strokeRoundRect(
+                        offsetX -
+                            (xm / 2) * (colorSize + margin) +
+                            margin / 2 +
+                            x * (colorSize + margin),
+                        offsetY -
+                            totalHeight / 2 +
+                            y * (colorSize + margin) +
+                            10,
+                        colorSize,
+                        colorSize,
+                        colorSize * 0.1,
+                        colorSize * 0.05,
+                        "white"
+                    );
+                if (
+                    rectOverlap(storedMouseX, storedMouseY, {
+                        x:
+                            offsetX -
+                            (xm / 2) * (colorSize + margin) +
+                            margin / 2 +
+                            x * (colorSize + margin),
+                        y:
+                            offsetY -
+                            totalHeight / 2 +
+                            y * (colorSize + margin) +
+                            10,
+                        w: colorSize,
+                        h: colorSize,
+                    })
+                ) {
+                    if (getKeyDown("mouse1")) {
+                        socket.emit("set_color", Object.values(hexColors)[n]);
+                        localStorage.setItem(
+                            "funkymulti_hexcode",
+                            Object.values(hexColors)[n]
+                        );
+                    }
+                    setCursorMode(CursorMode.Click);
                 }
-                setCursorMode(CursorMode.Click);
+                n++;
             }
-        });
+        }
 
         drawText(
             w / 2,
