@@ -4,7 +4,7 @@ width 2048
 height 1024
 camera 1
 background #A0A0A0
-outofbounds #A0A0A0
+outofbounds black
 -- Variables
 var r rect
 var c collides-rect
