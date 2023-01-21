@@ -2499,7 +2499,7 @@ function drawHUD() {
     //#endregion
     //#region Loadout Screen
     if (ply.isSelectingPrimary) {
-        drawRect(0, 0, w, h, "rgba(0,0,0, 0.75)");
+        drawRect(0, 0, w, h, "rgba(0,0,0, 0.5)");
         drawText(w / 2, (h / 12) * 1.5, "Loadout", "white", font(56), "center");
 
         var infoTextX = (w / 10) * 8;
