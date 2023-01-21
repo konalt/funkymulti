@@ -425,6 +425,7 @@ var gameState = {
             dmg: 10,
             draw: () => {},
             isSmokeGrenade: false,
+            isThermiteGrenade: false,
             id: "grenade_frag",
         },
         {
@@ -432,7 +433,16 @@ var gameState = {
             dmg: 0,
             draw: () => {},
             isSmokeGrenade: true,
+            isThermiteGrenade: false,
             id: "grenade_smoke",
+        },
+        {
+            name: "Thermite Grenade",
+            dmg: 0,
+            draw: () => {},
+            isSmokeGrenade: false,
+            isThermiteGrenade: true,
+            id: "grenade_thermite",
         },
     ],
 };
@@ -1231,7 +1241,8 @@ function tick() {
                 });
                 var bulletCount = grenade.isSmokeGrenade
                     ? 50
-                    : grenade.owner == "VladimirPutin"
+                    : grenade.owner == "VladimirPutin" ||
+                      grenade.isThermiteGrenade
                     ? 10
                     : 50;
                 var mx = grenade.x;
@@ -1239,7 +1250,7 @@ function tick() {
                 var px = grenade.x;
                 var py = grenade.y;
                 for (let i = 0; i < bulletCount; i++) {
-                    if (!grenade.isSmokeGrenade) {
+                    if (!grenade.isSmokeGrenade && !grenade.isThermiteGrenade) {
                         var bullet = {
                             x: 0,
                             y: 0,
@@ -1279,6 +1290,7 @@ function tick() {
                             primeTime: Date.now(),
                             life: 0,
                             isMoving: true,
+                            owner: grenade.owner,
                         };
                         var x = mx - px;
                         var y = my - py;
@@ -1292,14 +1304,27 @@ function tick() {
                         y = y / l;
                         grenade2.x = grenade.x;
                         grenade2.y = grenade.y;
-                        grenade2.dx = x * (i * 0.1);
-                        grenade2.dy = y * (i * 0.1);
-                        grenade2.createTime = Date.now();
-                        gameState.smokeParticles.push(grenade2);
+                        grenade2.dx =
+                            x *
+                            (i * 0.1) *
+                            (grenade.isThermiteGrenade ? 0.5 : 1);
+                        grenade2.dy =
+                            y *
+                            (i * 0.1) *
+                            (grenade.isThermiteGrenade ? 0.5 : 1);
+                        grenade2.createTime = Date.now() + 10000;
+                        (grenade.isSmokeGrenade
+                            ? gameState.smokeParticles
+                            : gameState.flames
+                        ).push(grenade2);
                     }
                 }
                 io.emit("adv_sound", [
-                    "grenade_boom",
+                    grenade.isThermiteGrenade
+                        ? "thermite_boom"
+                        : grenade.isSmokeGrenade
+                        ? "smoke_boom"
+                        : "grenade_boom",
                     grenade.x,
                     grenade.y,
                     999999,
@@ -2381,8 +2406,10 @@ io.on("connection", (socket) => {
             isPrimed: true,
             id: gi,
             isSmokeGrenade: getWeaponData(ply.loadout[3]).isSmokeGrenade,
+            isThermiteGrenade: getWeaponData(ply.loadout[3]).isThermiteGrenade,
             a: Math.floor(Math.random() * 360),
         };
+        console.log(grenade);
         grenade.x = ply.x;
         grenade.y = ply.y;
         gameState.grenades.push(grenade);

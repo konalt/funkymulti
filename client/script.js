@@ -1299,14 +1299,20 @@ function drawPlayer(ply, self, name, transparent = false) {
         var handLeft = hands[0];
         var handRight = hands[1];
         if (handLeft[2] && handLeft[0] != 900 && handLeft[1] != 900) {
-            drawCirc(
-                ply2.x + handLeft[0],
-                ply2.y + handLeft[1],
+            ctx.translate(ply2.x + handLeft[0], ply2.y + handLeft[1]);
+            ctx.rotate(xOffset);
+            ctx.translate(-(ply2.x + handLeft[0]), -(ply2.y + handLeft[1]));
+            drawRect(
+                ply2.x + handLeft[0] - 4.5,
+                ply2.y + handLeft[1] - 4.5,
+                9,
                 9,
                 color,
-                4,
                 usableContext
             );
+            ctx.translate(ply2.x + handLeft[0], ply2.y + handLeft[1]);
+            ctx.rotate(-xOffset);
+            ctx.translate(-(ply2.x + handLeft[0]), -(ply2.y + handLeft[1]));
         }
         if (handRight[2] && handRight[0] != 900 && handRight[1] != 900) {
             drawCirc(
@@ -2347,7 +2353,7 @@ var primaries = [
         "Full Auto\nShotgun",
     ],
     ["Fists", "Dual\nScrewdrivers"],
-    ["Frag\nGrenade", "Smoke\nGrenade"],
+    ["Frag\nGrenade", "Smoke\nGrenade", "Thermite\nGrenade"],
 ];
 
 var isJoinEligible = false;

@@ -14,5 +14,7 @@ revolver_reload
 revolver_shoot
 shotgun_reload
 shotgun_shoot
+smoke_boom
 sniper_reload
 sniper_shoot
+thermite_boom
