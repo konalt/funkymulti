@@ -379,7 +379,13 @@ var gameState = {
             fireRate: 100,
             isAutomatic: false,
             draw: (ply, selHand, xOffset) => {
-                function _drawSai(yOff, xOffset) {
+                function _drawSai(yOff, xOffset, rmul = 1) {
+                    /* usableContext.translate(ply.x + xOffset, ply.y + yOff);
+                    usableContext.rotate(((xOffset * Math.PI) / 180) * rmul);
+                    usableContext.translate(
+                        -(ply.x + xOffset),
+                        -(ply.y + yOff)
+                    ); */
                     drawLine(
                         ply.x + 30 + 5 + xOffset,
                         ply.y - yOff,
@@ -398,13 +404,19 @@ var gameState = {
                         5,
                         usableContext
                     );
+                    /* usableContext.translate(ply.x + xOffset, ply.y + yOff);
+                    usableContext.rotate((-(xOffset * Math.PI) / 180) * rmul);
+                    usableContext.translate(
+                        -(ply.x + xOffset),
+                        -(ply.y + yOff)
+                    ); */
                 }
                 if (selHand == 0) {
-                    _drawSai(20, xOffset);
-                    _drawSai(-20, 0);
+                    _drawSai(20, xOffset, 1);
+                    _drawSai(-20, 0, 0);
                 } else {
-                    _drawSai(20, 0);
-                    _drawSai(-20, xOffset);
+                    _drawSai(20, 0, 0);
+                    _drawSai(-20, xOffset, -1);
                 }
             },
             clipSize: 0,

@@ -1300,7 +1300,7 @@ function drawPlayer(ply, self, name, transparent = false) {
         var handRight = hands[1];
         if (handLeft[2] && handLeft[0] != 900 && handLeft[1] != 900) {
             ctx.translate(ply2.x + handLeft[0], ply2.y + handLeft[1]);
-            ctx.rotate(xOffset);
+            ctx.rotate((xOffset * Math.PI) / 180);
             ctx.translate(-(ply2.x + handLeft[0]), -(ply2.y + handLeft[1]));
             drawRect(
                 ply2.x + handLeft[0] - 4.5,
@@ -1311,7 +1311,7 @@ function drawPlayer(ply, self, name, transparent = false) {
                 usableContext
             );
             ctx.translate(ply2.x + handLeft[0], ply2.y + handLeft[1]);
-            ctx.rotate(-xOffset);
+            ctx.rotate((-xOffset * Math.PI) / 180);
             ctx.translate(-(ply2.x + handLeft[0]), -(ply2.y + handLeft[1]));
         }
         if (handRight[2] && handRight[0] != 900 && handRight[1] != 900) {
@@ -1346,13 +1346,13 @@ function drawPlayer(ply, self, name, transparent = false) {
         var handLeft = hands[0];
         var handRight = hands[1];
         if (!handLeft[2] && handLeft[0] != 900 && handLeft[1] != 900) {
-            drawCirc(
-                ply2.x + handLeft[0],
-                ply2.y + handLeft[1],
-                9,
-                color,
-                4,
-                usableContext
+            usableContext.translate(ply2.x + handLeft[0], ply2.y + handLeft[1]);
+            usableContext.rotate((xOffset * 10 * Math.PI) / 180);
+            drawCirc(0, 0, 9, color, 4, usableContext);
+            usableContext.rotate((-xOffset * 10 * Math.PI) / 180);
+            usableContext.translate(
+                -(ply2.x + handLeft[0]),
+                -(ply2.y + handLeft[1])
             );
         }
         if (!handRight[2] && handRight[0] != 900 && handRight[1] != 900) {
