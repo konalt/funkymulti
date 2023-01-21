@@ -358,7 +358,7 @@ var gameState = {
         },
         {
             name: "Full Auto Shotgun",
-            dmg: 5,
+            dmg: 15,
             fireRate: 250,
             isAutomatic: true,
             draw: (ply, _ctx, cameraOffsets) => {
