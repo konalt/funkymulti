@@ -1,5 +1,6 @@
 "use strict";
-import init, { decompressGzip } from "./wasm_gzip/wasm_gzip.js";
+import init, { compressGzip, decompressGzip } from "./wasm_gzip/wasm_gzip.js";
+await init();
 
 /**
  * @type {HTMLCanvasElement}
@@ -210,18 +211,17 @@ var justPressed = [];
 var justReleased = [];
 var typeKeys = [];
 
-var pingSmoother = [0, 0, 0, 0, 0];
+//var pingSmoother = [0, 0, 0, 0, 0];
 
 setInterval(() => {
-    const start = Date.now();
-
-    socket.emit("konalt_ping", () => {
+    //const start = Date.now();
+    /* socketEmit("konalt_ping", () => {
         pingSmoother.shift();
         pingSmoother.push(Date.now() - start);
         netInfoMachineReadable.ping = Math.round(
             pingSmoother.reduce((a, b) => a + b, 0) / pingSmoother.length
         );
-    });
+    }); */
 }, 5000);
 
 function font(size) {
@@ -288,8 +288,8 @@ var tryConnectTime = Date.now();
 var firstConnect = true;
 
 socket.on("connect", () => {
-    socket.emit("set_username", username);
-    socket.emit("ply", defGameState.players.__local);
+    socketEmit("set_username", username);
+    socketEmit("ply", defGameState.players.__local);
     loadSavedLoadoutData();
     firstConnect = false;
 });
@@ -379,7 +379,7 @@ function loadSavedLoadoutData() {
         [-1, -1, -1, -1].join(":");
     t.split(":").forEach((w, i) => {
         if (w == -1) return;
-        socket.emit("choose_weapon", [i, w]);
+        socketEmit("choose_weapon", [i, w]);
     });
 }
 
@@ -406,7 +406,7 @@ function draw() {
             } else {
                 var lp = gameState.players[socket.id];
                 if (lp.isTyping != messagemode)
-                    socket.emit("typing", messagemode);
+                    socketEmit("typing", messagemode);
                 if (forceEnableCamera) {
                     enableCamera = true;
                 } else {
@@ -442,10 +442,10 @@ function draw() {
                     !messagemode &&
                     !lp.isSelectingPrimary
                 ) {
-                    socket.emit("move", moveData());
+                    socketEmit("move", moveData());
                     lastMoveData = moveData();
                 }
-                //socket.emit("ply", gameState.players.__local);
+                //socketEmit("ply", gameState.players.__local);
                 if (getKeyDown("keyc") && !messagemode) {
                     highlighted({
                         x: storedMouseX - cameraOffsets[0],
@@ -455,10 +455,10 @@ function draw() {
                     });
                 }
                 if (getKeyDown("keyr") && !messagemode) {
-                    socket.emit("reload_gun");
+                    socketEmit("reload_gun");
                 }
                 if (getKeyDown("keyy") && !messagemode) {
-                    socket.emit("map_reload");
+                    socketEmit("map_reload");
                 }
                 if (
                     getKeyDown("keyt") &&
@@ -469,7 +469,7 @@ function draw() {
                     typing = "";
                     typeKeys = [];
                     onMessageFinish = function (text) {
-                        socket.emit("send_message", text);
+                        socketEmit("send_message", text);
                     };
                     typingUpdate = () => {
                         return true;
@@ -477,13 +477,13 @@ function draw() {
                     triggerMessageFinishOnEscape = false;
                 }
                 /* if (getKeyDown("keyb") && !messagemode) {
-                socket.emit("summon_russian_army");
+                socketEmit("summon_russian_army");
             } */
                 if (getKeyDown("bracketleft") && !messagemode) {
-                    socket.emit("spawn_ai");
+                    socketEmit("spawn_ai");
                 }
                 if (getKeyDown("keyx") && !messagemode) {
-                    socket.emit("use_water");
+                    socketEmit("use_water");
                 }
                 if (gameState.players[socket.id].isDead) {
                     if (
@@ -507,7 +507,7 @@ function draw() {
                             storedMouseY > rect.y &&
                             storedMouseY < rect.y + rect.h
                         ) {
-                            socket.emit("respawn");
+                            socketEmit("respawn");
                         }
                     }
                 } else if (gameState.players[socket.id].isSelectingPrimary) {
@@ -546,7 +546,7 @@ function draw() {
                     if (c != null) {
                         var slot = c[1];
                         var wep = c[0];
-                        socket.emit("choose_weapon", [slot, wep]);
+                        socketEmit("choose_weapon", [slot, wep]);
                         saveLoadoutData([slot, wep]);
                         if (messagemode) {
                             messagemode = false;
@@ -579,7 +579,7 @@ function draw() {
                                     "funkymulti_username",
                                     text
                                 );
-                                socket.emit("set_username", text);
+                                socketEmit("set_username", text);
                             };
                             typingUpdate = (text) => {
                                 drawText(
@@ -618,7 +618,7 @@ function draw() {
                         // hovering over join btn
                         if (isJoinEligible) {
                             if (getKeyDown("mouse1")) {
-                                socket.emit("ready");
+                                socketEmit("ready");
                             }
                             setCursorMode(CursorMode.Click);
                         } else {
@@ -666,50 +666,50 @@ function draw() {
                             lp.y,
                         ];
                     }
-                    if (getWeaponData(lp.weapon).isAutomatic) {
+                    if (getWeaponData(lp.weapon).isAutomatic && lp.canFire) {
                         if (getKey("mouse1") && !messagemode) {
-                            socket.emit("shoot_bullet", md);
+                            socketEmit("shoot_bullet", md);
                         }
                     } else {
                         if (getKeyDown("mouse1") && !messagemode) {
-                            socket.emit("shoot_bullet", md);
+                            socketEmit("shoot_bullet", md);
                         }
                     }
                 }
                 if (getKeyDown("digit2") && !messagemode) {
-                    socket.emit("setweapon", lp.loadout[0]);
+                    socketEmit("setweapon", lp.loadout[0]);
                     curslot = 0;
                 }
                 if (getKeyDown("digit1") && !messagemode) {
-                    socket.emit("setweapon", lp.loadout[1]);
+                    socketEmit("setweapon", lp.loadout[1]);
                     curslot = 1;
                 }
                 if (getKeyDown("digit3") && !messagemode) {
-                    socket.emit("setweapon", lp.loadout[2]);
+                    socketEmit("setweapon", lp.loadout[2]);
                     curslot = 2;
                 }
                 if (getKeyDown("scrollup") && !messagemode) {
                     curslot++;
                     if (curslot > 2) curslot = 0;
-                    socket.emit("setweapon", lp.loadout[curslot]);
+                    socketEmit("setweapon", lp.loadout[curslot]);
                 }
                 if (getKeyDown("scrolldown") && !messagemode) {
                     curslot--;
                     if (curslot < 0) curslot = 2;
-                    socket.emit("setweapon", lp.loadout[curslot]);
+                    socketEmit("setweapon", lp.loadout[curslot]);
                 }
                 if (
                     (getKeyDown("keyq") || getKeyDown("keyv")) &&
                     !messagemode
                 ) {
                     heldGrenade = Math.floor(Math.random() * 16384).toString();
-                    socket.emit("primegrenade", heldGrenade);
+                    socketEmit("primegrenade", heldGrenade);
                 }
                 if (getKeyDown("keyn") && !messagemode) {
                     showNetInfo = !showNetInfo;
                 }
                 if ((getKeyUp("keyq") || getKeyUp("keyv")) && !messagemode) {
-                    socket.emit("tossgrenade", [
+                    socketEmit("tossgrenade", [
                         storedMouseX,
                         storedMouseY,
                         lp.x + cameraOffsets[0],
@@ -718,10 +718,10 @@ function draw() {
                     ]);
                 }
                 if (getKeyUp("mouse1") && !messagemode) {
-                    socket.emit("mouseup");
+                    socketEmit("mouseup");
                 }
                 if (getKeyDown("mouse1") && !messagemode) {
-                    socket.emit("mousedown");
+                    socketEmit("mousedown");
                 }
 
                 drawMap(gameState.map, false);
@@ -1005,7 +1005,7 @@ socketEvent("wep_clips", (d) => {
 var usernames = {};
 socketEvent("usernames", (data) => {
     usernames = data;
-    if (!usernames[socket.id]) socket.emit("set_username", username);
+    if (!usernames[socket.id]) socketEmit("set_username", username);
 });
 socketEvent("chat_clear", () => {
     chat = [];
@@ -2260,6 +2260,7 @@ socketEvent("texture_data", (txts) => {
 });
 
 window.onload = sndinit;
+sndinit();
 var audiocontext; // Audio context
 var source;
 
@@ -2596,7 +2597,7 @@ function drawHUD() {
                     })
                 ) {
                     if (getKeyDown("mouse1")) {
-                        socket.emit("set_color", Object.values(hexColors)[n]);
+                        socketEmit("set_color", Object.values(hexColors)[n]);
                         localStorage.setItem(
                             "funkymulti_hexcode",
                             Object.values(hexColors)[n]
@@ -3070,10 +3071,23 @@ function drawHUD() {
     //#endregion
 }
 
-await init();
-
 function socketEvent(name, cb) {
     evts[name] = cb;
+}
+
+function jsonToArray(json) {
+    var str = JSON.stringify(json, null, 0);
+    var ret = new Uint8Array(str.length);
+    for (var i = 0; i < str.length; i++) {
+        ret[i] = str.charCodeAt(i);
+    }
+    return ret;
+}
+
+function socketEmit(msg, data) {
+    if (typeof data == "undefined") return socket.emit(msg);
+    var compressed = compressGzip(jsonToArray(data));
+    socket.emit(msg, compressed);
 }
 
 socket.onAny((n, d) => {
@@ -3190,7 +3204,5 @@ var scale = 919 / canvas.height;
 
 var w = 1633;
 var h = 919;
-
-console.log(scale);
 
 draw();

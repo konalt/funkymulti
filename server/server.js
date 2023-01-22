@@ -5,7 +5,7 @@ const https = require("https");
 const sio = require("socket.io");
 const express = require("express");
 const flaps = require("./plugins/flaps");
-const { gzip } = require("zlib");
+const { gzip, gunzip } = require("zlib");
 
 // HTTPS certificates
 const options = {
@@ -2026,7 +2026,20 @@ io.on("connection", (socket) => {
     emitSOCKET(socket, "sound_data", sounds);
     emitSOCKET(socket, "texture_data", textures);
     initScoreboardData(socket.id);
-    socket.on("move", (data) => {
+    var evts = {};
+    function socketEvent(name, cb) {
+        evts[name] = cb;
+    }
+    socket.onAny((n, d) => {
+        if (!d) return evts[n](undefined);
+        console.log(d);
+        gunzip(Buffer.from(d), (_err, decomp2) => {
+            console.log(decomp2);
+            var decomp = JSON.parse(new TextDecoder().decode(decomp2));
+            evts[n](decomp);
+        });
+    });
+    socketEvent("move", (data) => {
         if (gameIsEnding) return;
         var ply = gameState.players[socket.id];
         if (!ply) return;
@@ -2039,7 +2052,7 @@ io.on("connection", (socket) => {
         ply.a = parseFloat(data.slice(5));
     });
     var ply;
-    socket.on("ply", (pl) => {
+    socketEvent("ply", (pl) => {
         gameState.players[socket.id] = pl;
         if (
             gameState.players[socket.id] &&
@@ -2063,19 +2076,19 @@ io.on("connection", (socket) => {
             return false;
         }
     }
-    socket.on("set_username", (name) => {
+    socketEvent("set_username", (name) => {
         usernames[socket.id] = name;
         emitSOCKET(socket, "usernames", usernames);
         checkJoinOK();
     });
-    socket.on("set_color", (hex) => {
+    socketEvent("set_color", (hex) => {
         ply.hexColor = hex;
         checkJoinOK();
     });
-    socket.on("typing", (bool) => {
+    socketEvent("typing", (bool) => {
         ply.isTyping = bool;
     });
-    socket.on("respawn", () => {
+    socketEvent("respawn", () => {
         if (gameIsEnding) return;
         var spawn =
             gameState.map.ents.spawns[
@@ -2097,7 +2110,7 @@ io.on("connection", (socket) => {
         ply.wepClips = getMaxWepClips();
         ply.isReloading = false;
     });
-    socket.on("send_message", (msg) => {
+    socketEvent("send_message", (msg) => {
         if (msg.startsWith("!bot")) {
             switch (msg.split(" ")[1]) {
                 case "weapon":
@@ -2317,13 +2330,13 @@ io.on("connection", (socket) => {
             content: newContent,
         });
     });
-    socket.on("choose_weapon", (wep) => {
+    socketEvent("choose_weapon", (wep) => {
         if (gameIsEnding) return;
         if (!ply) return;
         ply.loadout[wep[0]] = wep[1];
         checkJoinOK();
     });
-    socket.on("ready", () => {
+    socketEvent("ready", () => {
         if (checkJoinOK()) {
             ply.weapon = ply.loadout[1];
             ply.isSelectingPrimary = false;
@@ -2334,25 +2347,25 @@ io.on("connection", (socket) => {
             });
         }
     });
-    socket.on("map_reload", () => {
+    socketEvent("map_reload", () => {
         loadSettings();
         gameState.map = loadMap(maplist[mapIndex]);
         loadWaypoints(maplist[mapIndex]);
         emitIO("nav_data", navData);
         emitIO("gs", gameState);
     });
-    socket.on("spawn_ai", () => {
+    socketEvent("spawn_ai", () => {
         if (gameIsEnding) return;
         spawnBot();
     });
-    socket.on("use_water", () => {
+    socketEvent("use_water", () => {
         if (gameIsEnding) return;
         if (!ply.hasWater || ply.isDead || ply.hp >= 100) return;
         ply.hasWater = false;
         ply.hp = 100;
         emitSOCKET(socket, "gs", gameState);
     });
-    socket.on("disconnect", () => {
+    socketEvent("disconnect", () => {
         console.log(socket.id + " has left");
         emitIO("recieve_message", {
             author: "___NONAME___",
@@ -2380,7 +2393,7 @@ io.on("connection", (socket) => {
         scoreboardData = tmp;
         emitIO("scoreboard", scoreboardData);
     });
-    socket.on("reload_gun", () => {
+    socketEvent("reload_gun", () => {
         if (gameIsEnding) return;
         var ply = gameState.players[socket.id];
         if (!ply)
@@ -2403,19 +2416,19 @@ io.on("connection", (socket) => {
             ply.wepClips[ply.weapon] = getWeaponData(ply.weapon).clipSize;
         }, getWeaponData(ply.weapon).reloadTime);
     });
-    socket.on("mousedown", () => {
+    socketEvent("mousedown", () => {
         var ply = gameState.players[socket.id];
         if (!ply) return console.log("[warning] invalid player shot bullet?");
         if (ply.isDead || ply.isSelectingPrimary) return;
         ply.isMouseDown = true;
     });
-    socket.on("mouseup", () => {
+    socketEvent("mouseup", () => {
         var ply = gameState.players[socket.id];
         if (!ply) return console.log("[warning] invalid player shot bullet?");
         if (ply.isDead || ply.isSelectingPrimary) return;
         ply.isMouseDown = false;
     });
-    socket.on("shoot_bullet", (md) => {
+    socketEvent("shoot_bullet", (md) => {
         if (gameIsEnding) return;
         var ply = gameState.players[socket.id];
         if (!ply) return console.log("[warning] invalid player shot bullet?");
@@ -2483,7 +2496,7 @@ io.on("connection", (socket) => {
             }, getWeaponData(ply.weapon).fireRate);
         }
     });
-    socket.on("primegrenade", (gi) => {
+    socketEvent("primegrenade", (gi) => {
         if (gameIsEnding) return;
         var ply = gameState.players[socket.id];
         if (!ply)
@@ -2518,14 +2531,14 @@ io.on("connection", (socket) => {
         ply.canGrenade = true; // ! change
         emitIO("sound", "grenade_pin");
     });
-    socket.on("summon_russian_army", () => {
+    socketEvent("summon_russian_army", () => {
         if (gameIsEnding) return;
         gameState.russkiyPlane.isActive = true;
         gameState.russkiyPlane.x = -300;
         gameState.russkiyPlane.y = gameState.map.height + 100;
         gameState.russkiyPlane.activatedTime = Date.now();
     });
-    socket.on("use_melee", (md) => {
+    socketEvent("use_melee", (md) => {
         if (gameIsEnding) return;
         var ply = gameState.players[socket.id];
         if (!ply) return console.log("[warning] invalid player used melee");
@@ -2586,7 +2599,7 @@ io.on("connection", (socket) => {
         gameState.grenades.push(grenade);
         ply.canGrenade = false; */
     });
-    socket.on("tossgrenade", (md) => {
+    socketEvent("tossgrenade", (md) => {
         if (gameIsEnding) return;
         var ply = gameState.players[socket.id];
         if (!ply)
@@ -2622,7 +2635,7 @@ io.on("connection", (socket) => {
             ply.canGrenade = true;
         }, 6000);
     });
-    socket.on("rocket", (md) => {
+    socketEvent("rocket", (md) => {
         if (gameIsEnding) return;
         var ply = gameState.players[socket.id];
         ply.lastAttack = Date.now();
@@ -2658,7 +2671,7 @@ io.on("connection", (socket) => {
         bullet.dy = y * 10;
         gameState.rockets.push(bullet);
     });
-    socket.on("setweapon", (wep) => {
+    socketEvent("setweapon", (wep) => {
         if (gameIsEnding) return;
         if (!gameState.players[socket.id]) return;
         gameState.players[socket.id].weapon = wep;
@@ -2683,7 +2696,7 @@ io.on("connection", (socket) => {
             }
         }
     });
-    socket.on("konalt_ping", (callback) => {
+    socketEvent("konalt_ping", (callback) => {
         callback();
     });
 });
