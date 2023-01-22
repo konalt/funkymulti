@@ -448,7 +448,7 @@ var gameState = {
             reloadTime: 5000,
             spread: 5,
             bulletCount: 1,
-            moveMult: 0.4,
+            moveMult: 0.7,
             bulletLengthMult: 1.25,
             barrelLength: 80,
             id: "m249",
