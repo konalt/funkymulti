@@ -2687,8 +2687,6 @@ setInterval(() => {
     });
 }, 1000);
 
-var enableInfiniteAmmoGlitch = false;
-
 function getWeaponData(wt) {
     if (wt == 100) {
         return { dmg: 10, name: "GrenadeBullet", draw: () => {} };
@@ -3464,6 +3462,17 @@ function reloadSound(wep) {
     }
 }
 
+function getRouteDist(route) {
+    var e = 0;
+    for (let i = 0; i < route.length; i++) {
+        const cur = route[i];
+        const next = route[i + 1];
+        if (!next) continue;
+        e += distance(cur.x, cur.y, next.x, next.y);
+    }
+    return [e, route];
+}
+
 function botGetRoute(source, dest, lwid) {
     var cr =
         botCachedRoutes.find(
@@ -3531,18 +3540,26 @@ function botGetRoute(source, dest, lwid) {
     if (source.id == dest.id)
         return [source.conns[Math.floor(Math.random() * source.conns.length)]];
     source.conns.forEach((c) => {
-        routes.push(walk(getWptFromId(c), [], true));
+        routes.push(walk(getWptFromId(c), [source.id, c], true));
     });
-    routes = routes.filter((r) => r != null);
+    routes = routes.filter((r) => r != null && r[1].length > 1);
     routes = routes.sort((a, b) => a[0] - b[0]);
-    var ret = !routes[0] ? [source] : routes[0][1];
+    var ret = !routes[0] ? [dest] : routes[0][1];
     botCachedRoutes.push({
         from: source.id,
         to: dest.id,
         route: ret,
         map: gameState.map.name,
     });
-    logDebug("[route-caching] Caching route WP" + source.id + "-WP" + dest.id);
+    logDebug(
+        "[route-caching] Caching route WP" +
+            source.id +
+            "-WP" +
+            dest.id +
+            " (r:" +
+            ret.map((n) => n.id).join(">") +
+            ")"
+    );
     return ret;
 }
 
@@ -3709,71 +3726,445 @@ function getRoutes(source, dest) {
 }
 
 function doBotAI(bot, botname) {
-    var bd = botData[botname];
-    if (!bd) {
-        botData[botname] = bdInit({});
-        bd = botData[botname];
-    }
-    var closestPlayer = getClosestPlayer(bot);
-    if (
-        !closestPlayer ||
-        !closestPlayer.weapon || // to check if player exists and isnt the empty object defined in getClosestPlayer
-        closestPlayer.isDead ||
-        closestPlayer.isSelectingPrimary
-    )
-        return;
-    bd.pathing.final = getClosestWaypoint(closestPlayer);
-    if (!bd.pathing.next) {
-        var closestWaypoint = getClosestWaypoint(bot);
-        bd.pathing.next = closestWaypoint;
-    } else {
-        if (distance(bd.pathing.next.x, bd.pathing.next.y, bot.x, bot.y) < 15) {
-            if (!bd.pathing.route[0]) {
-                bd.pathing.route = getRoutes(
-                    getClosestWaypoint(bot),
-                    getClosestWaypoint(closestPlayer)
-                );
-            }
-            bd.pathing.next = getWptFromId(bd.pathing.route.shift());
+    if (opt.old_ai) {
+        function botGetClosestPlayer(skipDead) {
+            var ignore_players = opt.bot_ignore_players;
+            var ignore_bots = opt.bot_ignore_bots;
+            var nearest = null;
+            Object.entries(gameState.players).forEach((plydata) => {
+                var ply = plydata[1];
+                if (
+                    ply == bot ||
+                    ((ply.isSelectingPrimary || ply.isDead) && skipDead)
+                )
+                    return;
+                if (ignore_players && !plydata[0].startsWith("Bot")) return;
+                if (ignore_bots && plydata[0].startsWith("Bot")) return;
+                if (!nearest) nearest = plydata;
+                if (
+                    distance(ply.x, ply.y, bot.x, bot.y) <
+                    distance(nearest[1].x, nearest[1].y, bot.x, bot.y)
+                )
+                    nearest = plydata;
+            });
+            return nearest;
         }
-        var vec = getVector(bd.pathing.next.x, bd.pathing.next.y, bot.x, bot.y);
-        var t = 0;
+
+        function getAngleToPos(x, y) {
+            let gameY = bot.y;
+            let gameX = bot.x;
+            let mouseY = y;
+            let mouseX = x;
+            let theta = 0;
+
+            if (mouseX > gameX) {
+                theta =
+                    (Math.atan((gameY - mouseY) / (gameX - mouseX)) * 180) /
+                    Math.PI;
+            } else if (mouseX < gameX) {
+                theta =
+                    180 +
+                    (Math.atan((gameY - mouseY) / (gameX - mouseX)) * 180) /
+                        Math.PI;
+            } else if (mouseX == gameX) {
+                if (mouseY > gameY) {
+                    theta = 90;
+                } else {
+                    theta = 270;
+                }
+            }
+            return Math.round(theta);
+        }
+
+        function botShootBullet(ply, md) {
+            if (!ply) return console.log("[warning] invalid bot shot bullet?");
+            if (!ply.canFire || ply.isDead || ply.isSelectingPrimary) return;
+            ply.lastAttack = Date.now();
+            var res = false;
+            var wep = getWeaponData(ply.weapon);
+            if (!wep.name.startsWith("__melee_"))
+                res = checkShit(md, 30 + wep.barrelLength);
+            var mx = md[0];
+            var my = md[1];
+            var px = md[2];
+            var py = md[3];
+            var x = mx - px;
+            var y = my - py;
+            if (opt.aim_debug) spawnDebugParticle(mx, my, "255,0,0");
+            if (opt.aim_debug) spawnDebugParticle(px, py, "0,0,255");
+            if (res || !ply.canFire) return;
+            ply.lastAttack = Date.now();
+            var l = Math.sqrt(x * x + y * y);
+            x = (x / l) * (30 + wep.barrelLength);
+            y = (y / l) * (30 + wep.barrelLength);
+
+            if (!wep.name.startsWith("__melee_")) {
+                useWeapon(getWeaponData(ply.weapon), [botname, ply], md, [
+                    ply.x + x,
+                    ply.y + y,
+                ]);
+            } else {
+                var m = melee(md, [botname, ply]);
+                ply.lastHand = Math.floor(Math.random() * 2);
+                if (m) dealPlyDamage(m, 20, [m.x, m.y], botname);
+            }
+            ply.canFire = false;
+            ply.wepClips[ply.weapon]--;
+            shootSound(ply.weapon, botname);
+
+            if (ply.wepClips[ply.weapon] == 0) {
+                if (!ply)
+                    return console.log(
+                        "[warning] invalid player attempted reload?"
+                    );
+                if (
+                    ply.isDead ||
+                    ply.wepClips[ply.weapon] ==
+                        getWeaponData(ply.weapon).clipSize
+                )
+                    return;
+                ply.isReloading = true;
+                ply.canFire = false;
+                ply.startedReloadingTime = Date.now();
+                reloadSound(ply.weapon);
+                setTimeout(() => {
+                    ply.isReloading = false;
+                    ply.canFire = true;
+                    ply.wepClips[ply.weapon] = getWeaponData(
+                        ply.weapon
+                    ).clipSize;
+                }, getWeaponData(ply.weapon).reloadTime);
+                return;
+            } else {
+                setTimeout(() => {
+                    ply.canFire = true;
+                }, getWeaponData(ply.weapon).fireRate);
+            }
+        }
+
+        function botGetMoveVector(md) {
+            var mx = md[0];
+            var my = md[1];
+            var px = md[2];
+            var py = md[3];
+            var x = mx - px;
+            var y = my - py;
+            var l = Math.sqrt(x * x + y * y);
+            x = x / l;
+            y = y / l;
+            return [x * 10, y * 10];
+        }
+
+        function respawn(ply) {
+            var spawn =
+                gameState.map.ents.spawns[
+                    Math.floor(Math.random() * gameState.map.ents.spawns.length)
+                ];
+            if (!spawn) {
+                console.log("[error] no valid spawn points!!!");
+                ply.x = 100;
+                ply.y = 100;
+            } else {
+                ply.x = spawn.x;
+                ply.y = spawn.y;
+            }
+            ply.hp = 100;
+            ply.hasWater = true;
+            ply.isDead = false;
+            ply.weapon = opt.bot_weapon;
+            ply.canFire = true;
+            ply.wepClips = getMaxWepClips();
+            ply.isReloading = false;
+        }
+        var data = botData[botname];
+
+        if (!data) {
+            r = reroute();
+            botData[botname] = {
+                current: botGetClosestWaypoint(bot),
+                next: r[0],
+                route: r,
+                lastPosX: 9999,
+                lastPosY: 9999,
+                lastPosTime: Date.now(),
+            };
+            data = botData[botname];
+        }
+
+        function botHasVisitedWpt(wpt, visited) {
+            return visited.filter((w) => w.id == wpt.id).length > 0;
+        }
+
+        function botGetClosestWaypoint(cur = null, skip = []) {
+            var nearest = null;
+            if (!cur) cur = { x: 9999, y: 9999, id: 9999 };
+            navData.waypoints.forEach((wpt) => {
+                if (botHasVisitedWpt(wpt, skip)) return;
+                if (
+                    botBulletWillHitWall(
+                        cur,
+                        [wpt.x, wpt.y, cur.x, cur.y],
+                        wpt,
+                        false
+                    )
+                )
+                    return;
+                if (!nearest) {
+                    nearest = JSON.parse(JSON.stringify(wpt));
+                    return;
+                }
+                if (
+                    distance(wpt.x, wpt.y, cur.x, cur.y) <
+                    distance(nearest.x, nearest.y, cur.x, cur.y)
+                ) {
+                    nearest = JSON.parse(JSON.stringify(wpt));
+                }
+            });
+            return nearest;
+        }
+
+        function botGetFurthestWaypoint(cur = null, skip = []) {
+            var nearest = null;
+            if (!cur) cur = { x: 9999, y: 9999, id: 9999 };
+            navData.waypoints.forEach((wpt) => {
+                if (botHasVisitedWpt(wpt, skip)) return;
+                if (!nearest) {
+                    nearest = JSON.parse(JSON.stringify(wpt));
+                    return;
+                }
+                if (
+                    distance(wpt.x, wpt.y, cur.x, cur.y) >=
+                    distance(nearest.x, nearest.y, cur.x, cur.y)
+                ) {
+                    nearest = JSON.parse(JSON.stringify(wpt));
+                }
+            });
+            return nearest;
+        }
+
+        function reroute(lw) {
+            var lobotomy = false;
+            if (!lobotomy) {
+                var cp =
+                    botGetClosestPlayer(true) || botGetClosestPlayer(false);
+                var cw = botGetClosestWaypoint(bot, []);
+                var wp = cp
+                    ? botGetClosestWaypoint(cp[1], [])
+                    : botGetFurthestWaypoint(bot, []);
+                var r;
+                if (!wp || !cw || cw.id == wp.id) {
+                    return [wp];
+                } else {
+                    var log = true;
+                    if (cw.conns.includes(wp.id)) {
+                        r = [wp];
+                        log = false;
+                    } else {
+                        r = botGetRoute(cw, wp, lw);
+                    }
+                    if (r.length == 1) log = false;
+                    if (log)
+                        logDebug(
+                            "[bot] Bot route from WP" +
+                                cw.id +
+                                " to WP" +
+                                wp.id +
+                                ": " +
+                                r.map((x) => x.id).join(" ")
+                        );
+                    if (data) {
+                        data.next = r[0];
+                        data.route = r;
+                    }
+                    io.emit("nav_route", r);
+                    return r;
+                }
+            } else {
+                var cp =
+                    botGetClosestPlayer(true) || botGetClosestPlayer(false);
+                var cw = botGetClosestWaypoint(bot, []);
+                var nw = null;
+                cw.conns.forEach((pwi) => {
+                    if (pwi == lw) return;
+                    var pw = getWptFromId(pwi);
+                    var pd = distance(pw.x, pw.y, cp[1].x, cp[1].y);
+                    var nd = nw
+                        ? distance(nw.x, nw.y, cp[1].x, cp[1].y)
+                        : Infinity;
+                    if (pd < nd) {
+                        nw = pw;
+                    }
+                });
+                logDebug("[fast-waypoints] next wp: " + nw.id);
+                if (data) {
+                    data.next = nw;
+                    data.route = [nw];
+                    data.current = cw;
+                }
+                return [nw];
+            }
+        }
+        var closestPlayer = botGetClosestPlayer(true);
+        if (!data.next) reroute(NaN);
+        if (distance(bot.x, bot.y, data.next.x, data.next.y) < 30) {
+            if (data.route.length == 1) {
+                reroute(data.current.id);
+            }
+        }
+        if (closestPlayer && !closestPlayer[1].isDead) {
+            if (
+                distance(bot.x, bot.y, closestPlayer[1].x, closestPlayer[1].y) <
+                    30 + getWeaponData(bot.weapon).barrelLength &&
+                !getWeaponData(bot.weapon).name.startsWith("__melee_")
+            ) {
+                bot.weapon = bot.loadout[2];
+            } else {
+                bot.weapon = bot.loadout[1];
+            }
+            if (
+                !botBulletWillHitWall(
+                    bot,
+                    [closestPlayer[1].x, closestPlayer[1].y, bot.x, bot.y],
+                    closestPlayer[1]
+                ) &&
+                bot.canFire
+            ) {
+                bot.a = getAngleToPos(closestPlayer[1].x, closestPlayer[1].y);
+                botShootBullet(bot, [
+                    closestPlayer[1].x,
+                    closestPlayer[1].y,
+                    bot.x,
+                    bot.y,
+                    closestPlayer[1].x,
+                    closestPlayer[1].y,
+                    bot.x,
+                    bot.y,
+                ]);
+            } else {
+                // showoff moves
+                bot.spr =
+                    distance(
+                        closestPlayer[1].x,
+                        closestPlayer[1].y,
+                        bot.x,
+                        bot.y
+                    ) > 400;
+                bot.a += 10;
+            }
+        } else {
+            // showoff moves
+            bot.spr = false;
+            bot.a += 10;
+        }
+
         bot.u = false;
         bot.l = false;
         bot.d = false;
         bot.r = false;
+        if (!data.next) reroute(NaN);
+        var vec = botGetMoveVector([data.next.x, data.next.y, bot.x, bot.y]);
+        var t = 0.7;
         if (vec[0] > t) bot.r = true;
         if (vec[0] < -t) bot.l = true;
         if (vec[1] > t) bot.d = true;
         if (vec[1] < -t) bot.u = true;
-        bot.spr = true;
-        var hit = botBulletWillHitWall(
-            bot,
-            [closestPlayer.x, closestPlayer.y, bot.x, bot.y],
-            closestPlayer
-        );
-        if (!hit && bot.canFire) {
-            shootSound(bot.weapon, botname);
-            useWeapon(
-                getWeaponData(bot.weapon),
-                [botname, bot],
-                [closestPlayer.x, closestPlayer.y, bot.x, bot.y]
-            );
-            bot.canFire = false;
-            setTimeout(() => {
-                bot.canFire = true;
-            }, getWeaponData(bot.weapon).fireRate);
+        if (!bot.isDead) {
+            if (data.lastPosX == bot.x && data.lastPosY == bot.y) {
+                if (data.lastPosTime > 300) {
+                    botData[botname] = false;
+                    data = botData[botname];
+                }
+            } else {
+                data.lastPosX = parseInt(bot.x.toString());
+                data.lastPosY = parseInt(bot.y.toString());
+                data.lastPosTime = Date.now();
+            }
         }
-    }
-    bot.a = getAngleArbitrary(closestPlayer.x, closestPlayer.y, bot.x, bot.y);
-    if (bot.isDead && bot.respawnTimer < 0) {
-        bot.hp = 100;
-        bot.hasWater = true;
-        bot.isDead = false;
-        bot.weapon = bot.loadout[1];
-        bot.canFire = true;
-        bot.wepClips = getMaxWepClips();
-        bot.isReloading = false;
+        if (bot.isDead && bot.respawnTimer < 0) {
+            respawn(bot);
+            botData[botname] = false;
+            data = botData[botname];
+        }
+    } else {
+        var bd = botData[botname];
+        if (!bd) {
+            botData[botname] = bdInit({});
+            bd = botData[botname];
+        }
+        var closestPlayer = getClosestPlayer(bot);
+        if (
+            !closestPlayer ||
+            !closestPlayer.weapon || // to check if player exists and isnt the empty object defined in getClosestPlayer
+            closestPlayer.isDead ||
+            closestPlayer.isSelectingPrimary
+        )
+            return;
+        bd.pathing.final = getClosestWaypoint(closestPlayer);
+        if (!bd.pathing.next) {
+            var closestWaypoint = getClosestWaypoint(bot);
+            bd.pathing.next = closestWaypoint;
+        } else {
+            if (
+                distance(bd.pathing.next.x, bd.pathing.next.y, bot.x, bot.y) <
+                15
+            ) {
+                if (!bd.pathing.route[0]) {
+                    bd.pathing.route = getRoutes(
+                        getClosestWaypoint(bot),
+                        getClosestWaypoint(closestPlayer)
+                    );
+                }
+                bd.pathing.next = getWptFromId(bd.pathing.route.shift());
+            }
+            var vec = getVector(
+                bd.pathing.next.x,
+                bd.pathing.next.y,
+                bot.x,
+                bot.y
+            );
+            var t = 0;
+            bot.u = false;
+            bot.l = false;
+            bot.d = false;
+            bot.r = false;
+            if (vec[0] > t) bot.r = true;
+            if (vec[0] < -t) bot.l = true;
+            if (vec[1] > t) bot.d = true;
+            if (vec[1] < -t) bot.u = true;
+            bot.spr = true;
+            var hit = botBulletWillHitWall(
+                bot,
+                [closestPlayer.x, closestPlayer.y, bot.x, bot.y],
+                closestPlayer
+            );
+            if (!hit && bot.canFire) {
+                shootSound(bot.weapon, botname);
+                useWeapon(
+                    getWeaponData(bot.weapon),
+                    [botname, bot],
+                    [closestPlayer.x, closestPlayer.y, bot.x, bot.y]
+                );
+                bot.canFire = false;
+                setTimeout(() => {
+                    bot.canFire = true;
+                }, getWeaponData(bot.weapon).fireRate);
+            }
+        }
+        bot.a = getAngleArbitrary(
+            closestPlayer.x,
+            closestPlayer.y,
+            bot.x,
+            bot.y
+        );
+        if (bot.isDead && bot.respawnTimer < 0) {
+            bot.hp = 100;
+            bot.hasWater = true;
+            bot.isDead = false;
+            bot.weapon = bot.loadout[1];
+            bot.canFire = true;
+            bot.wepClips = getMaxWepClips();
+            bot.isReloading = false;
+        }
     }
 }
 
@@ -3815,7 +4206,7 @@ function loadWaypoints(mapname) {
 }
 
 function loadWaypointsAuto(map) {
-    var steps = 50;
+    var steps = opt.auto_nav_steps;
     var wpts = navAutoGetWaypoints(map, steps);
     navAutoFindConns(wpts, map.width / steps);
     navData.waypoints = wpts;
@@ -3895,7 +4286,7 @@ function navFindConnsSingular(wpt1, data, maxDist = Infinity) {
     var c = [...wpt1.conns];
     data.forEach((wpt2) => {
         if (wpt1.id == wpt2.id) return;
-        if (distance(wpt1.x, wpt1.y, wpt2.x, wpt2.y) >= maxDist) return;
+        if (distance(wpt1.x, wpt1.y, wpt2.x, wpt2.y) > maxDist * 1.1) return;
         var h = botBulletWillHitWall(
             wpt1,
             [wpt2.x, wpt2.y, wpt1.x, wpt1.y],
@@ -4000,6 +4391,8 @@ function navAutoGetWaypoints(map, steps) {
 }
 
 gameState.map = loadMap(maplist[mapIndex]);
+
+var enableInfiniteAmmoGlitch = opt.enable_infinite_ammo;
 
 navData.waypoints = opt.auto_nav
     ? loadWaypointsAuto(gameState.map)
