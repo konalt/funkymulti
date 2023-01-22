@@ -2699,7 +2699,6 @@ function getWeaponData(wt) {
 function rsize(inf, n) {
     var ns = inf.split(",").map((n) => parseInt(n));
     if (n >= ns[0] && n <= ns[2]) {
-        console.log("Resized!");
         return ns[1];
     }
     return n;
