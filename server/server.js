@@ -1593,13 +1593,13 @@ setInterval(() => {
 }, 5000);
 
 function emitIO(msg, data) {
-    if (!data) return io.emit(msg);
+    if (typeof data == "undefined") return io.emit(msg);
     gzip(Buffer.from(JSON.stringify(data)), (_err, compressed) => {
         io.emit(msg, compressed);
     });
 }
 function emitSOCKET(socket, msg, data) {
-    if (!data) return socket.emit(msg);
+    if (typeof data == "undefined") return socket.emit(msg);
     gzip(Buffer.from(JSON.stringify(data)), (_err, compressed) => {
         socket.emit(msg, compressed);
     });
