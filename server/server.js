@@ -913,7 +913,7 @@ function tick() {
             mapIndex++;
             if (mapIndex == maplist.length) mapIndex = 0;
             gameState.map = loadMap(maplist[mapIndex]);
-            navData.waypoints = auto
+            navData.waypoints = opt.auto_nav
                 ? loadWaypointsAuto(gameState.map)
                 : loadWaypoints(maplist[mapIndex]);
             io.emit("nav_data", navData);
