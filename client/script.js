@@ -1,3 +1,5 @@
+import init, { compressGzip, decompressGzip } from "./wasm_gzip/wasm_gzip.js";
+
 /**
  * @type {HTMLCanvasElement}
  */
@@ -9,6 +11,8 @@ var navCtx = navCanvas.getContext("2d");
 var ctx = canvas2.getContext("2d");
 var ctx2 = canvas.getContext("2d");
 var _ctxref = ctx;
+
+var evts = {};
 
 var isFirefox = navigator.userAgent.toLowerCase().indexOf("firefox") > -1;
 
@@ -400,6 +404,11 @@ function loadSavedLoadoutData() {
     });
 }
 
+var opt = {};
+socketEvent("opt", (o) => {
+    opt = o;
+});
+
 function draw() {
     try {
         clear();
@@ -441,6 +450,8 @@ function draw() {
                 } else {
                     cameraOffsets = [0, 0];
                 }
+                maptimer =
+                    opt.game_time - (serverTime() - gameState.roundStartTime);
                 thisFrameCursorMode = CursorMode.Default;
                 isMovingUp = getKey("keyw");
                 isMovingDown = getKey("keys");
@@ -981,7 +992,7 @@ var lastFpsTime = Date.now();
 var fps = 0;
 var optimizedDivisionSteps = 10;
 
-socket.on("gs", (data) => {
+socketEvent("gs", (data) => {
     localPlayerName = socket.id;
     var newData = { ...data };
     var newGeo = [];
@@ -1022,15 +1033,15 @@ socket.on("gs", (data) => {
     gameState = newData;
     updateOptScale();
 });
-socket.on("wep_clips", (d) => {
+socketEvent("wep_clips", (d) => {
     if (gameState.players[socket.id]) gameState.players[socket.id].wepClips = d;
 });
 var usernames = {};
-socket.on("usernames", (data) => {
+socketEvent("usernames", (data) => {
     usernames = data;
     if (!usernames[socket.id]) socket.emit("set_username", username);
 });
-socket.on("chat_clear", () => {
+socketEvent("chat_clear", () => {
     chat = [];
 });
 
@@ -1184,31 +1195,31 @@ function parseParticleData(buld) {
     });
     return final;
 }
-socket.on("plyd", (data) => {
+socketEvent("plyd", (data) => {
     gameState.players = parsePlayerData(data);
 });
-socket.on("rktd", (data) => {
+socketEvent("rktd", (data) => {
     gameState.rockets = parseRocketData(data);
 });
-socket.on("buld", (data) => {
+socketEvent("buld", (data) => {
     gameState.bullets = parseBulletData(data);
 });
-socket.on("grnd", (data) => {
+socketEvent("grnd", (data) => {
     gameState.grenades = parseGrenadeData(data);
 });
-socket.on("smkd", (data) => {
+socketEvent("smkd", (data) => {
     gameState.smokeParticles = parseSmokeData(data);
 });
-socket.on("flmd", (data) => {
+socketEvent("flmd", (data) => {
     gameState.flames = parseFlameData(data);
 });
-socket.on("prtd", (data) => {
+socketEvent("prtd", (data) => {
     gameState.particles = parseParticleData(data);
 });
-socket.on("russkiy", (plane) => {
+socketEvent("russkiy", (plane) => {
     gameState.russkiyPlane = plane;
 });
-socket.on("killstreak", (data) => {
+socketEvent("killstreak", (data) => {
     console.log(
         "Killstreak: " + data[0] + " has " + data[2] + " kills and " + data[1]
     );
@@ -1217,7 +1228,7 @@ socket.on("killstreak", (data) => {
         content: data[0] + " " + data[1],
     });
 });
-socket.on("killstreak_end", (data) => {
+socketEvent("killstreak_end", (data) => {
     console.log(
         "Killstreak Ended: " +
             data[0] +
@@ -1232,15 +1243,15 @@ socket.on("killstreak_end", (data) => {
         content: data[0] + " ended " + data[1] + "'s killstreak",
     });
 });
-socket.on("recieve_message", (message) => {
+socketEvent("recieve_message", (message) => {
     chat.push(message);
 });
-/* socket.on("server_tp", (data) => {
+/* socketEvent("server_tp", (data) => {
     gameState.players.__local.x = parseInt(data.split(",")[0]);
     gameState.players.__local.y = parseInt(data.split(",")[1]);
 }); */
 var maptimer = 5 * 60 * 1000;
-socket.on("timer", (data) => {
+socketEvent("timer", (data) => {
     maptimer = data;
 });
 
@@ -1255,25 +1266,25 @@ function stopSound(a) {
     a.pause();
     a.currentTime = 0;
 }
-socket.on("sound", (soundname) => {
+socketEvent("sound", (soundname) => {
     playByteArray(soundname);
 });
 
 var nSounds = {};
 
-socket.on("sound_loop", (soundname) => {
+socketEvent("sound_loop", (soundname) => {
     if (nSounds[soundname[1]] && nSounds[soundname[1]].playbackRate.value != 0)
         return;
     nSounds[soundname[1]] = playByteArrayLooped(soundname[0]);
 });
-socket.on("stopsoundloop", (n) => {
+socketEvent("stopsoundloop", (n) => {
     stopSoundN(n);
 });
 
 function distance(x1, y1, x2, y2) {
     return Math.hypot(x2 - x1, y2 - y1);
 }
-socket.on("adv_sound", (sound) => {
+socketEvent("adv_sound", (sound) => {
     if (
         distance(
             sound[1],
@@ -1301,7 +1312,7 @@ function serverTime() {
     return pollServer[1] + o;
 }
 
-socket.on("time", (t) => {
+socketEvent("time", (t) => {
     pollServer = [Date.now(), t];
 });
 
@@ -1875,6 +1886,7 @@ function drawText(
         if (!lines[i]) continue;
         var matches = [];
         var j = 0;
+        var match;
         while ((match = textEscapeCode.exec(lines[i])) != null) {
             matches.push([match[0], match.index - j * 2]);
             j++;
@@ -2302,7 +2314,7 @@ function drawMap(map, layer2) {
 var renderScale = 1;
 
 var sounds = {};
-socket.on("sound_data", (snds) => {
+socketEvent("sound_data", (snds) => {
     snds.forEach((sound_id) => {
         fetch("snd/" + sound_id + ".mp3")
             .then((response) => response.arrayBuffer())
@@ -2313,17 +2325,17 @@ socket.on("sound_data", (snds) => {
             });
     });
 });
-socket.on("texture_data", (txts) => {
+socketEvent("texture_data", (txts) => {
     txts.forEach((txt_id) => {
         preloadImage("texture/" + txt_id);
     });
 });
 
-window.onload = init;
+window.onload = sndinit;
 var audiocontext; // Audio context
 var source;
 
-function init() {
+function sndinit() {
     if (!window.AudioContext) {
         if (!window.webkitAudioContext) {
             alert("YER BROWSER IS SHIT! NO AUDIO!!!!");
@@ -2383,7 +2395,7 @@ if (localStorage.getItem("funkymulti_username")) {
 
 var formattedScoreboard = [];
 
-socket.on("scoreboard", (data) => {
+socketEvent("scoreboard", (data) => {
     var tmp = {};
     Object.entries(data).forEach((i) => {
         Object.entries(i[1]).forEach((j) => {
@@ -2404,7 +2416,7 @@ socket.on("scoreboard", (data) => {
     formattedScoreboard = tmp2;
 });
 
-socket.on("kill", (dat) => {
+socketEvent("kill", (dat) => {
     killfeed.push({
         killer: dat[0],
         victim: dat[1],
@@ -2417,10 +2429,10 @@ socket.on("kill", (dat) => {
 
 var gameOver = false;
 
-socket.on("game_end", () => {
+socketEvent("game_end", () => {
     gameOver = true;
 });
-socket.on("game_start", () => {
+socketEvent("game_start", () => {
     gameOver = false;
 });
 
@@ -2440,7 +2452,7 @@ var primaries = [
 
 var isJoinEligible = false;
 
-socket.on("join_ok", (d) => {
+socketEvent("join_ok", (d) => {
     isJoinEligible = d;
 });
 
@@ -3207,9 +3219,23 @@ function isSafeBulletPos(ply) {
 
 var navRoute = [];
 
-socket.on("nav_route", (r) => {
+socketEvent("nav_route", (r) => {
     navRoute = r;
     //drawNavData(navData);
+});
+
+await init();
+
+function socketEvent(name, cb) {
+    evts[name] = cb;
+}
+
+socket.onAny((n, d) => {
+    var decomp = JSON.parse(
+        new TextDecoder().decode(decompressGzip(new Uint8Array(d)))
+    );
+    console.log(n, decomp);
+    evts[n](decomp);
 });
 
 var navDataDrawn = false;
@@ -3301,14 +3327,14 @@ socket.on("error", () => {
 
 var navData = {};
 
-socket.on("nav_data", (data) => {
+socketEvent("nav_data", (data) => {
     navData = data;
     drawNavData(navData);
 });
 
 var storedMem = "0.0KB";
 
-socket.on("mem", (usageData) => {
+socketEvent("mem", (usageData) => {
     storedMem = Math.round(usageData.heapUsed / 1000) + "KB";
 });
 
@@ -3346,8 +3372,8 @@ ctx.scale((919 / canvas.height) * optscale, (919 / canvas.height) * optscale);
 
 var scale = 919 / canvas.height;
 
-w = 1633;
-h = 919;
+var w = 1633;
+var h = 919;
 
 console.log(scale);
 

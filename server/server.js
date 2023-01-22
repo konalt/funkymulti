@@ -5,6 +5,8 @@ const https = require("https");
 const sio = require("socket.io");
 const express = require("express");
 const flaps = require("./plugins/flaps");
+const { zip } = require("gzip-js");
+const { gzip } = require("zlib");
 
 // HTTPS certificates
 const options = {
@@ -603,7 +605,7 @@ function spawnBot() {
         loadout: [0, opt.bot_weapon, 6, 8],
     };
     initScoreboardData(botname);
-    io.emit("recieve_message", {
+    emitIO("recieve_message", {
         author: "___NONAME___",
         content: botname + "&7 has joined the game",
     });
@@ -720,7 +722,7 @@ function dealPlyDamage(ply, dmg, hitLoc, notify) {
             killCounts[ply[0]] = 0;
         }
         if (killCounts[ply[0]] > 5) {
-            io.emit("killstreak_end", [
+            emitIO("killstreak_end", [
                 usernames[notify] ? usernames[notify] : notify,
                 usernames[ply[0]] ? usernames[ply[0]] : ply[0],
                 killCounts[ply[0]],
@@ -747,8 +749,8 @@ function dealPlyDamage(ply, dmg, hitLoc, notify) {
         scoreboardData.totalScore[ply[0]]--;
         scoreboardData.totalKills[notify]++;
         scoreboardData.totalScore[notify]++;
-        io.emit("scoreboard", scoreboardData);
-        io.emit("kill", [notify, ply[0]]);
+        emitIO("scoreboard", scoreboardData);
+        emitIO("kill", [notify, ply[0]]);
         var n = usernames[notify] ? usernames[notify] : notify;
         switch (killCounts[notify]) {
             case 5:
@@ -757,7 +759,7 @@ function dealPlyDamage(ply, dmg, hitLoc, notify) {
                     !(notify.startsWith("Bot") && opt.bot_show_ks) ||
                     !notify.startsWith("Bot")
                 )
-                    io.emit("killstreak", [
+                    emitIO("killstreak", [
                         n,
                         "is on a KILLING SPREE!",
                         killCounts[notify],
@@ -769,7 +771,7 @@ function dealPlyDamage(ply, dmg, hitLoc, notify) {
                     (notify.startsWith("Bot") && opt.bot_show_ks) ||
                     !notify.startsWith("Bot")
                 )
-                    io.emit("killstreak", [
+                    emitIO("killstreak", [
                         n,
                         "is UNSTOPPABLE!",
                         killCounts[notify],
@@ -781,7 +783,7 @@ function dealPlyDamage(ply, dmg, hitLoc, notify) {
                     (notify.startsWith("Bot") && opt.bot_show_ks) ||
                     !notify.startsWith("Bot")
                 )
-                    io.emit("killstreak", [
+                    emitIO("killstreak", [
                         n,
                         "is on a RAMPAGE!",
                         killCounts[notify],
@@ -793,7 +795,7 @@ function dealPlyDamage(ply, dmg, hitLoc, notify) {
                     (notify.startsWith("Bot") && opt.bot_show_ks) ||
                     !notify.startsWith("Bot")
                 )
-                    io.emit("killstreak", [
+                    emitIO("killstreak", [
                         n,
                         "is GODLIKE!",
                         killCounts[notify],
@@ -805,7 +807,7 @@ function dealPlyDamage(ply, dmg, hitLoc, notify) {
                     (notify.startsWith("Bot") && opt.bot_show_ks) ||
                     !notify.startsWith("Bot")
                 )
-                    io.emit("killstreak", [
+                    emitIO("killstreak", [
                         n,
                         "is PSYCHOPATHIC!",
                         killCounts[notify],
@@ -902,13 +904,13 @@ function tick() {
         return; */
     gameState.gameTimer =
         opt.game_time - (Date.now() - gameState.roundStartTime);
-    if (nTick % timerUpdates == 0) io.emit("timer", gameState.gameTimer);
+    //if (nTick % timerUpdates == 0) emitIO("timer", gameState.gameTimer);
     if (gameState.gameTimer <= 0 && !gameIsEnding) {
         console.log("Game over!");
         gameIsEnding = true;
-        io.emit("scoreboard", scoreboardData);
-        io.emit("game_end");
-        io.emit("chat_clear");
+        emitIO("scoreboard", scoreboardData);
+        emitIO("game_end");
+        emitIO("chat_clear");
         setTimeout(() => {
             mapIndex++;
             if (mapIndex == maplist.length) mapIndex = 0;
@@ -916,7 +918,7 @@ function tick() {
             navData.waypoints = opt.auto_nav
                 ? loadWaypointsAuto(gameState.map)
                 : loadWaypoints(maplist[mapIndex]);
-            io.emit("nav_data", navData);
+            emitIO("nav_data", navData);
             scoreboardData = {
                 highestKillstreak: {},
                 totalDeaths: {},
@@ -955,8 +957,8 @@ function tick() {
             botData = {};
             gameState.roundStartTime = Date.now();
             gameIsEnding = false;
-            io.emit("gs", gameState);
-            io.emit("game_start");
+            emitIO("gs", gameState);
+            emitIO("game_start");
         }, 10000);
     }
     if (!gameIsEnding) {
@@ -1014,7 +1016,7 @@ function tick() {
             ) {
                 gameState.russkiyPlane.isActive = false;
             }
-            io.emit("russkiy", gameState.russkiyPlane);
+            emitIO("russkiy", gameState.russkiyPlane);
         }
         Object.entries(gameState.players).forEach((plydata) => {
             var ply = plydata[1];
@@ -1047,7 +1049,7 @@ function tick() {
                 getWeaponData(ply.loadout[1]).isFlamethrower &&
                 !ply.isMouseDown
             )
-                io.emit("stopsoundloop", plydata[0]);
+                emitIO("stopsoundloop", plydata[0]);
             if (isbot && opt.bot_ai_enabled) doBotAI(ply, plydata[0]);
             if (!ply.isDead && !ply.isSelectingPrimary) {
                 var vector = [0, 0];
@@ -1192,12 +1194,12 @@ function tick() {
                                     gameState.map.colliding.filter((g) => {
                                         return g != obj;
                                     });
-                                io.emit("sound", "glass_break");
-                                io.emit("gs", gameState);
+                                emitIO("sound", "glass_break");
+                                emitIO("gs", gameState);
                                 /* setTimeout(() => {
                                     gameState.map.geo.push(old);
                                     gameState.map.colliding.push(old);
-                                    io.emit("gs", gameState);
+                                    emitIO("gs", gameState);
                                 }, 100); */
                             }
                         }
@@ -1435,7 +1437,7 @@ function tick() {
                         ).push(grenade2);
                     }
                 }
-                io.emit("adv_sound", [
+                emitIO("adv_sound", [
                     grenade.isThermiteGrenade
                         ? "thermite_boom"
                         : grenade.isSmokeGrenade
@@ -1579,16 +1581,29 @@ var lastDatas = {};
 function cachedEmit(name, text) {
     if (lastDatas[name] == text) return;
     lastDatas[name] = text;
-    io.emit(name, text);
+    emitIO(name, text);
 }
 
 var usernames = {};
 
 setInterval(() => {
-    io.emit("usernames", usernames);
-    io.emit("mem", process.memoryUsage());
-    io.emit("time", Date.now());
-}, 1000);
+    /* emitIO("usernames", usernames);
+    emitIO("mem", process.memoryUsage()); */
+    emitIO("time", Date.now());
+}, 5000);
+
+function emitIO(msg, data) {
+    if (!data) return io.emit(msg);
+    gzip(Buffer.from(JSON.stringify(data)), (_err, compressed) => {
+        io.emit(msg, compressed);
+    });
+}
+function emitSOCKET(socket, msg, data) {
+    if (!data) return socket.emit(msg);
+    gzip(Buffer.from(JSON.stringify(data)), (_err, compressed) => {
+        socket.emit(msg, compressed);
+    });
+}
 
 function valueInRange(val, min, max) {
     return val >= min && val <= max;
@@ -1969,7 +1984,7 @@ function useWeapon(wep, plyd, md, od) {
             gameState.bullets.push(bullet);
         }
     } else {
-        if (ply.isMouseDown) io.emit("sound_loop", ["flamethrower", plyname]);
+        if (ply.isMouseDown) emitIO("sound_loop", ["flamethrower", plyname]);
         var grenade2 = {
             x: 0,
             y: 0,
@@ -2014,14 +2029,15 @@ function useWeapon(wep, plyd, md, od) {
 
 io.on("connection", (socket) => {
     console.log(socket.id + " has joined");
-    socket.emit("gs", gameState);
-    socket.emit("usernames", usernames);
-    socket.emit("scoreboard", scoreboardData);
-    socket.emit("nav_data", navData);
-    socket.emit("wep_clips", getMaxWepClips());
-    if (gameIsEnding) socket.emit("game_end");
-    socket.emit("sound_data", sounds);
-    socket.emit("texture_data", textures);
+    emitSOCKET(socket, "gs", gameState);
+    emitSOCKET(socket, "opt", opt);
+    emitSOCKET(socket, "usernames", usernames);
+    emitSOCKET(socket, "scoreboard", scoreboardData);
+    emitSOCKET(socket, "nav_data", navData);
+    emitSOCKET(socket, "wep_clips", getMaxWepClips());
+    if (gameIsEnding) emitSOCKET(socket, "game_end");
+    emitSOCKET(socket, "sound_data", sounds);
+    emitSOCKET(socket, "texture_data", textures);
     initScoreboardData(socket.id);
     socket.on("move", (data) => {
         if (gameIsEnding) return;
@@ -2043,7 +2059,7 @@ io.on("connection", (socket) => {
             gameState.players[socket.id].wepClips == null
         )
             gameState.players[socket.id].wepClips = getMaxWepClips();
-        socket.emit("gs", gameState);
+        emitSOCKET(socket, "gs", gameState);
         ply = pl;
     });
     function checkJoinOK() {
@@ -2053,17 +2069,17 @@ io.on("connection", (socket) => {
             usernames[socket.id] &&
             ply.hexColor != "None"
         ) {
-            socket.emit("join_ok", true);
+            emitSOCKET(socket, "join_ok", true);
             return true;
         } else {
-            socket.emit("join_ok", false);
+            emitSOCKET(socket, "join_ok", false);
             return false;
         }
     }
     socket.on("set_username", (name) => {
         var ply = gameState.players[socket.id];
         usernames[socket.id] = name;
-        socket.emit("usernames", usernames);
+        emitSOCKET(socket, "usernames", usernames);
         checkJoinOK();
     });
     socket.on("set_color", (hex) => {
@@ -2110,7 +2126,7 @@ io.on("connection", (socket) => {
                             a[1].loadout[1] = opt.bot_weapon;
                         }
                     });
-                    socket.emit("recieve_message", {
+                    emitSOCKET(socket, "recieve_message", {
                         author: "ServerBot",
                         content: "Bot weapon set.",
                     });
@@ -2118,7 +2134,7 @@ io.on("connection", (socket) => {
                     break;
                 case "ignore_players":
                     opt.bot_ignore_players = msg.split(" ")[2] == 1;
-                    socket.emit("recieve_message", {
+                    emitSOCKET(socket, "recieve_message", {
                         author: "ServerBot",
                         content:
                             "Bots will now " +
@@ -2129,7 +2145,7 @@ io.on("connection", (socket) => {
                     break;
                 case "ai":
                     opt.bot_ai_enabled = msg.split(" ")[2] == 1;
-                    socket.emit("recieve_message", {
+                    emitSOCKET(socket, "recieve_message", {
                         author: "ServerBot",
                         content:
                             "Bot AI " +
@@ -2142,7 +2158,7 @@ io.on("connection", (socket) => {
                     break;
                 case "ignore_bots":
                     opt.bot_ignore_bots = msg.split(" ")[2] == 1;
-                    socket.emit("recieve_message", {
+                    emitSOCKET(socket, "recieve_message", {
                         author: "ServerBot",
                         content:
                             "Bots will now " +
@@ -2153,7 +2169,7 @@ io.on("connection", (socket) => {
                     break;
                 case "show_ks":
                     opt.bot_show_ks = msg.split(" ")[2] == 1;
-                    socket.emit("recieve_message", {
+                    emitSOCKET(socket, "recieve_message", {
                         author: "ServerBot",
                         content:
                             "Bots will now " +
@@ -2170,7 +2186,7 @@ io.on("connection", (socket) => {
                     } else {
                         spawnBot();
                     }
-                    socket.emit("recieve_message", {
+                    emitSOCKET(socket, "recieve_message", {
                         author: "ServerBot",
                         content: "Bot(s) added.",
                     });
@@ -2179,7 +2195,7 @@ io.on("connection", (socket) => {
                     var count = Object.keys(gameState.players).filter((p) =>
                         p.startsWith("Bot")
                     ).length;
-                    socket.emit("recieve_message", {
+                    emitSOCKET(socket, "recieve_message", {
                         author: "ServerBot",
                         content: `There are ${count} bots ingame.`,
                     });
@@ -2204,14 +2220,14 @@ io.on("connection", (socket) => {
                         );
                     });
                     scoreboardData = tmp;
-                    io.emit("scoreboard", scoreboardData);
-                    socket.emit("recieve_message", {
+                    emitIO("scoreboard", scoreboardData);
+                    emitSOCKET(socket, "recieve_message", {
                         author: "ServerBot",
                         content: `Cleared all bots.`,
                     });
                     break;
                 default:
-                    io.emit("recieve_message", {
+                    emitIO("recieve_message", {
                         author: "ServerBot",
                         content:
                             "Unrecognized bot command: " + msg.split(" ")[1],
@@ -2220,8 +2236,8 @@ io.on("connection", (socket) => {
             return;
         } else if (msg.startsWith("!lightsoff")) {
             gameState.lightsOn = false;
-            io.emit("gs", gameState);
-            io.emit("recieve_message", {
+            emitIO("gs", gameState);
+            emitIO("recieve_message", {
                 author: "ServerBot",
                 content: "Toggled lights",
             });
@@ -2232,7 +2248,7 @@ io.on("connection", (socket) => {
             ]
                 ? parseInt(msg.split(" ")[1])
                 : 1;
-            socket.emit("recieve_message", {
+            emitSOCKET(socket, "recieve_message", {
                 author: "ServerBot",
                 content: "Weapon set.",
             });
@@ -2241,32 +2257,32 @@ io.on("connection", (socket) => {
             if (msg.split(" ")[1]) {
                 if (parseInt(msg.split(" ")[1])) {
                     restartTick(parseInt(msg.split(" ")[1]));
-                    io.emit("recieve_message", {
+                    emitIO("recieve_message", {
                         author: "ServerBot",
                         content:
                             "Tickrate changed to " + opt.sv_tickrate + " tps",
                     });
                 } else if (msg.split(" ")[1] == "inf") {
                     restartTick(NaN);
-                    io.emit("recieve_message", {
+                    emitIO("recieve_message", {
                         author: "ServerBot",
                         content: "Tickrate changed to Infinity",
                     });
                 } else {
-                    io.emit("recieve_message", {
+                    emitIO("recieve_message", {
                         author: "ServerBot",
                         content: "Tickrate must be either a number or inf",
                     });
                 }
             } else {
-                io.emit("recieve_message", {
+                emitIO("recieve_message", {
                     author: "ServerBot",
                     content: "Current tickrate: " + opt.sv_tickrate + " tps",
                 });
             }
             return;
         } else if (msg.startsWith("!chattest")) {
-            io.emit("recieve_message", {
+            emitIO("recieve_message", {
                 author: "ServerBot",
                 content:
                     "&cp&6i&eg&ao&9n &5i&cs &ef&aa&9t&bt&5e&cs&6t &aw&9h&be&5n &6h&ee &9e&ba&5t&cs &em&aa&9n&by &cs&6e&ee&ad&9s",
@@ -2277,7 +2293,7 @@ io.on("connection", (socket) => {
                 getWptFromId(parseInt(msg.split(" ")[1])),
                 getWptFromId(parseInt(msg.split(" ")[2]))
             );
-            io.emit("recieve_message", {
+            emitIO("recieve_message", {
                 author: "ServerBot",
                 content: r.join(" "),
             });
@@ -2286,7 +2302,7 @@ io.on("connection", (socket) => {
             var wpt = getWptFromId(parseInt(msg.split(" ")[1]));
             gameState.players[socket.id].x = wpt.x;
             gameState.players[socket.id].y = wpt.y;
-            io.emit("recieve_message", {
+            emitIO("recieve_message", {
                 author: "ServerBot",
                 content:
                     "Teleported to waypoint " + parseInt(msg.split(" ")[1]),
@@ -2294,7 +2310,7 @@ io.on("connection", (socket) => {
             return;
         } else if (msg.startsWith("!5000hp")) {
             gameState.players[socket.id].hp = 5000;
-            socket.emit("recieve_message", {
+            emitSOCKET(socket, "recieve_message", {
                 author: "ServerBot",
                 content: "&aI'M FUCKING INVINCIBLE!!!!",
             });
@@ -2308,7 +2324,7 @@ io.on("connection", (socket) => {
         });
         if (typeof newContent === "undefined") newContent = msg;
         if (newContent.length == 0) return;
-        io.emit("recieve_message", {
+        emitIO("recieve_message", {
             author: usernames[socket.id]
                 ? usernames[socket.id]
                 : socket.id.substring(0, 4),
@@ -2326,7 +2342,7 @@ io.on("connection", (socket) => {
             ply.weapon = ply.loadout[1];
             ply.isSelectingPrimary = false;
             ply.canFire = true;
-            io.emit("recieve_message", {
+            emitIO("recieve_message", {
                 author: "___NONAME___",
                 content: usernames[socket.id] + "&7 has joined the game",
             });
@@ -2336,8 +2352,8 @@ io.on("connection", (socket) => {
         loadSettings();
         gameState.map = loadMap(maplist[mapIndex]);
         loadWaypoints(maplist[mapIndex]);
-        io.emit("nav_data", navData);
-        io.emit("gs", gameState);
+        emitIO("nav_data", navData);
+        emitIO("gs", gameState);
     });
     socket.on("spawn_ai", () => {
         if (gameIsEnding) return;
@@ -2348,11 +2364,11 @@ io.on("connection", (socket) => {
         if (!ply.hasWater || ply.isDead || ply.hp >= 100) return;
         ply.hasWater = false;
         ply.hp = 100;
-        socket.emit("gs", gameState);
+        emitSOCKET(socket, "gs", gameState);
     });
     socket.on("disconnect", () => {
         console.log(socket.id + " has left");
-        io.emit("recieve_message", {
+        emitIO("recieve_message", {
             author: "___NONAME___",
             content: usernames[socket.id] + "&7 has left the game",
         });
@@ -2376,7 +2392,7 @@ io.on("connection", (socket) => {
             });
         });
         scoreboardData = tmp;
-        io.emit("scoreboard", scoreboardData);
+        emitIO("scoreboard", scoreboardData);
     });
     socket.on("reload_gun", () => {
         if (gameIsEnding) return;
@@ -2420,7 +2436,7 @@ io.on("connection", (socket) => {
         var ply = gameState.players[socket.id];
         if (!ply) return console.log("[warning] invalid player shot bullet?");
         if (ply.isDead || ply.isSelectingPrimary) {
-            io.emit("stopsoundloop", socket.id);
+            emitIO("stopsoundloop", socket.id);
             return;
         }
         var res = false;
@@ -2436,7 +2452,7 @@ io.on("connection", (socket) => {
         if (opt.aim_debug) spawnDebugParticle(mx, my, "255,0,0");
         if (opt.aim_debug) spawnDebugParticle(px, py, "0,0,255");
         if (res || !ply.canFire) {
-            if (res) io.emit("stopsoundloop", socket.id);
+            if (res) emitIO("stopsoundloop", socket.id);
             return;
         }
         ply.lastAttack = Date.now();
@@ -2516,7 +2532,7 @@ io.on("connection", (socket) => {
         grenade.y = ply.y;
         gameState.grenades.push(grenade);
         ply.canGrenade = true; // ! change
-        io.emit("sound", "grenade_pin");
+        emitIO("sound", "grenade_pin");
     });
     socket.on("summon_russian_army", () => {
         if (gameIsEnding) return;
@@ -2617,7 +2633,7 @@ io.on("connection", (socket) => {
         grenade.isPrimed = false;
         grenade.isMoving = true;
         grenade.createTime = Date.now();
-        io.emit("sound", "grenade_toss");
+        emitIO("sound", "grenade_toss");
         setTimeout(() => {
             ply.canGrenade = true;
         }, 6000);
@@ -3393,38 +3409,38 @@ var killCounts = {};
 function shootSound(wep) {
     switch (getWeaponData(wep).name) {
         case "Revolver":
-            io.emit("sound", "revolver_shoot");
+            emitIO("sound", "revolver_shoot");
             break;
         case "Laser Pistol":
-            io.emit("sound", "laser_shoot");
+            emitIO("sound", "laser_shoot");
             break;
         case "Desert Eagle":
-            io.emit("sound", "deagle_shoot");
+            emitIO("sound", "deagle_shoot");
             break;
         case "M16 Rifle":
-            io.emit("sound", "ar_shoot");
+            emitIO("sound", "ar_shoot");
             break;
         case "Shotgun":
-            io.emit("sound", "shotgun_shoot");
+            emitIO("sound", "shotgun_shoot");
             break;
         case "Flamethrower":
             // do nothing, flamethrower has a different
             // sound method!
             break;
         case "Full Auto Shotgun":
-            io.emit("sound", "fashotgun_shoot");
+            emitIO("sound", "fashotgun_shoot");
             break;
         case "M249":
-            io.emit("sound", "m249_shoot");
+            emitIO("sound", "m249_shoot");
             break;
         case "Sniper Rifle":
-            io.emit("sound", "sniper_shoot");
+            emitIO("sound", "sniper_shoot");
             break;
         case "__melee_fists":
-            io.emit("sound", "melee_fist");
+            emitIO("sound", "melee_fist");
             break;
         case "__melee_Dual Screwdrivers":
-            io.emit("sound", "melee_fist");
+            emitIO("sound", "melee_fist");
             break;
         default:
             console.log(
@@ -3438,28 +3454,28 @@ function shootSound(wep) {
 function reloadSound(wep) {
     switch (getWeaponData(wep).name) {
         case "Revolver":
-            io.emit("sound", "revolver_reload");
+            emitIO("sound", "revolver_reload");
             break;
         case "Laser Pistol":
-            io.emit("sound", "laser_reload");
+            emitIO("sound", "laser_reload");
             break;
         case "Desert Eagle":
-            io.emit("sound", "deagle_reload");
+            emitIO("sound", "deagle_reload");
             break;
         case "M16 Rifle":
-            io.emit("sound", "ar_reload");
+            emitIO("sound", "ar_reload");
             break;
         case "Shotgun":
-            io.emit("sound", "shotgun_reload");
+            emitIO("sound", "shotgun_reload");
             break;
         case "Sniper Rifle":
-            io.emit("sound", "sniper_reload");
+            emitIO("sound", "sniper_reload");
             break;
         case "Full Auto Shotgun":
-            io.emit("sound", "fashotgun_reload");
+            emitIO("sound", "fashotgun_reload");
             break;
         case "M249":
-            io.emit("sound", "m249_reload");
+            emitIO("sound", "m249_reload");
             break;
         default:
             if (getWeaponData(wep).name.startsWith("__melee_")) break;
@@ -3982,7 +3998,7 @@ function doBotAI(bot, botname) {
                         data.next = r[0];
                         data.route = r;
                     }
-                    io.emit("nav_route", r);
+                    emitIO("nav_route", r);
                     return r;
                 }
             } else {
