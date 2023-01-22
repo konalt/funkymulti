@@ -816,9 +816,9 @@ function dealPlyDamage(ply, dmg, hitLoc, notify) {
                 break;
         }
         if (gameState.players[notify]) {
-            gameState.players[notify].hp += 30;
-            if (gameState.players[notify].hp > 200)
-                gameState.players[notify].hp = 200;
+            gameState.players[notify].hp += 100;
+            /* if (gameState.players[notify].hp > 200)
+                gameState.players[notify].hp = 200; */
         }
     } else {
         gameState.particles.push({
@@ -2288,6 +2288,13 @@ io.on("connection", (socket) => {
                 author: "ServerBot",
                 content:
                     "Teleported to waypoint " + parseInt(msg.split(" ")[1]),
+            });
+            return;
+        } else if (msg.startsWith("!5000hp")) {
+            gameState.players[socket.id].hp = 5000;
+            socket.emit("recieve_message", {
+                author: "ServerBot",
+                content: "&aI'M FUCKING INVINCIBLE!!!!",
             });
             return;
         }
