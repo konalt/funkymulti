@@ -2365,7 +2365,7 @@ io.on("connection", (socket) => {
         ply.hp = 100;
         emitSOCKET(socket, "gs", gameState);
     });
-    socketEvent("disconnect", () => {
+    socket.on("disconnect", () => {
         console.log(socket.id + " has left");
         emitIO("recieve_message", {
             author: "___NONAME___",
