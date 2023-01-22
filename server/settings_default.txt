@@ -13,3 +13,4 @@ random_spread 1
 smoke_grenades 1
 aim_debug 0
 game_time 180000int
+auto_nav 0

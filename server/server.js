@@ -4001,7 +4001,6 @@ function navAutoGetWaypoints(map, steps) {
 
 gameState.map = loadMap(maplist[mapIndex]);
 
-var auto = false;
-navData.waypoints = auto
+navData.waypoints = opt.auto_nav
     ? loadWaypointsAuto(gameState.map)
     : loadWaypoints(maplist[mapIndex]);
