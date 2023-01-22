@@ -1,4 +1,5 @@
-import init, { compressGzip, decompressGzip } from "./wasm_gzip/wasm_gzip.js";
+"use strict";
+import init, { decompressGzip } from "./wasm_gzip/wasm_gzip.js";
 
 /**
  * @type {HTMLCanvasElement}
@@ -6,8 +7,6 @@ import init, { compressGzip, decompressGzip } from "./wasm_gzip/wasm_gzip.js";
 var canvas = document.getElementById("upscaledcanvas");
 var canvas2 = document.getElementById("drawcanvas");
 var plyDrawCanvas = document.getElementById("playercanvas"); // we have to do all this just to bypass transparency
-var navCanvas = document.getElementById("navcanvas");
-var navCtx = navCanvas.getContext("2d");
 var ctx = canvas2.getContext("2d");
 var ctx2 = canvas.getContext("2d");
 var _ctxref = ctx;
@@ -42,7 +41,6 @@ function updateOptScale() {
 
     properScale(canvas2);
     properScale(plyDrawCanvas);
-    properScale(navCanvas);
 
     storedMouseX = storedMouseXUnscaled * scale;
     storedMouseY = storedMouseYUnscaled * scale;
@@ -55,28 +53,10 @@ window.onresize = () => {
     updateOptScale();
 };
 
-function sz(size) {
-    var ref = refH();
-
-    var ret = h * (size / ref);
-    if (size == "__mapwidth") ret = w;
-    if (size == "__mapheight") ret = h;
-    return ret;
-}
-
 function un(size) {
     var ref = h;
 
     var ret = refH() * (size / ref);
-    if (size == "__mapwidth") ret = w;
-    if (size == "__mapheight") ret = h;
-    return ret;
-}
-
-function sz2(size) {
-    var ref = 919;
-
-    var ret = h * (size / ref);
     if (size == "__mapwidth") ret = w;
     if (size == "__mapheight") ret = h;
     return ret;
@@ -169,7 +149,7 @@ function drawLine(startX, startY, endX, endY, col, thickness, ctx = _ctxref) {
     ctx.stroke();
 }
 
-function drawArrow(
+/* function drawArrow(
     startX,
     startY,
     endX,
@@ -197,7 +177,7 @@ function drawArrow(
         endY - headlen * Math.sin(angle + Math.PI / 6)
     );
     context.stroke();
-}
+} */
 
 function preloadImage(path) {
     var img1 = new Image();
@@ -302,6 +282,7 @@ function getKeyUp(key) {
     return justReleased.includes(key.toLowerCase());
 }
 
+// eslint-disable-next-line no-undef
 const socket = io("https://konalt.us.to:29401");
 var tryConnectTime = Date.now();
 var firstConnect = true;
@@ -321,8 +302,6 @@ var isSprinting = false;
 var lastMoveData = "__nomove";
 var heldGrenade = 0;
 
-var blur = false;
-
 function moveData() {
     return `${isMovingUp ? 1 : 0}${isMovingDown ? 1 : 0}${
         isMovingLeft ? 1 : 0
@@ -334,8 +313,8 @@ function moveData() {
 
 var messagemode = false;
 var typing = "";
-var onMessageFinish = (message) => {};
-var typingUpdate = (text) => {};
+var onMessageFinish = () => {};
+var typingUpdate = () => {};
 var triggerMessageFinishOnEscape = false;
 
 var chat = [];
@@ -361,17 +340,17 @@ function isCovered(ply) {
                 ret = xOverlap && yOverlap;
                 break;
             case "circ":
-                var rectA = { x: ply.x - 0.5, y: ply.y - 0.5, w: 1, h: 1 };
-                var rectB = {
+                rectA = { x: ply.x - 0.5, y: ply.y - 0.5, w: 1, h: 1 };
+                rectB = {
                     x: obj.x1 - obj.r,
                     y: obj.y1 - obj.r,
                     w: obj.r * 2,
                     h: obj.r * 2,
                 };
-                var xOverlap =
+                xOverlap =
                     valueInRange(rectA.x, rectB.x, rectB.x + rectB.w) ||
                     valueInRange(rectB.x, rectA.x, rectA.x + rectA.w);
-                var yOverlap =
+                yOverlap =
                     valueInRange(rectA.y, rectB.y, rectB.y + rectB.h) ||
                     valueInRange(rectB.y, rectA.y, rectA.y + rectA.h);
                 ret = xOverlap && yOverlap;
@@ -962,8 +941,6 @@ function draw() {
 
 var testing = false;
 
-var lastEv = "INVALID";
-
 var storedMouseX = 0,
     storedMouseY = 0;
 var storedMouseXUnscaled = 0,
@@ -974,17 +951,6 @@ canvas.onmousemove = function (evt) {
     storedMouseXUnscaled = evt.offsetX;
     storedMouseYUnscaled = evt.offsetY;
 };
-
-function getMousePos(canvas, evt) {
-    var rect = canvas.getBoundingClientRect(), // abs. size of element
-        scaleX = canvas.width / rect.width, // relationship bitmap vs. element for x
-        scaleY = canvas.height / rect.height; // relationship bitmap vs. element for y
-
-    return {
-        x: (evt.clientX - rect.left) * scaleX, // scale mouse coordinates after they have
-        y: (evt.clientY - rect.top) * scaleY, // been adjusted to be relative to element
-    };
-}
 
 var netInfoMachineReadable = { ping: 0 };
 var showNetInfo = false;
@@ -1255,17 +1221,6 @@ socketEvent("timer", (data) => {
     maptimer = data;
 });
 
-function playSound(path, cb = function () {}) {
-    var a = new Audio(path);
-    a.play();
-    a.addEventListener("ended", cb);
-    return a;
-}
-
-function stopSound(a) {
-    a.pause();
-    a.currentTime = 0;
-}
 socketEvent("sound", (soundname) => {
     playByteArray(soundname);
 });
@@ -1634,7 +1589,7 @@ function drawSmokeParticle(grn) {
         serverTime() - grn.createTime - maxLifeTime > 0
             ? serverTime() - grn.createTime - maxLifeTime
             : 0;
-    alpha = Math.abs(l / fadeTime - fadeTime) - fadeTime + 1;
+    var alpha = Math.abs(l / fadeTime - fadeTime) - fadeTime + 1;
     drawCirc(
         grn.x + cameraOffsets[0],
         grn.y + cameraOffsets[1],
@@ -1725,11 +1680,6 @@ function getAngleArbitrary(x, y, x2, y2) {
 
     return Math.round(theta);
 }
-
-var Weapon = {
-    Glock17: 0,
-    M16: 1,
-};
 
 var defGameState = {
     players: {
@@ -1955,28 +1905,6 @@ function wrap(text, width) {
     return lines.join("\n");
 }
 
-function drawTextWrapped(
-    x,
-    y,
-    maxwidth,
-    text = "No text supplied",
-    col = "red",
-    font = font(48),
-    align = "center"
-) {
-    ctx.fillStyle = col;
-    ctx.textAlign = align;
-    ctx.font = font;
-    ctx.lineWidth = 0.01;
-    text = wrap(text, maxwidth);
-    var lines = text.split("\n");
-    var lineheight = parseInt(font) + 5;
-    for (var i = 0; i < lines.length; i++) {
-        ctx.fillText(lines[i], x, y + i * lineheight);
-        ctx.strokeText(lines[i], x, y + i * lineheight);
-    }
-}
-
 function makeEnum(a = []) {
     var d = {};
     a.forEach((b, c) => {
@@ -2082,7 +2010,6 @@ function shouldDraw(obj) {
 ctx.imageSmoothingEnabled = false;
 
 function drawMap(map, layer2) {
-    var ply = gameState.players[socket.id];
     if (!layer2) {
         drawRect(0, 0, w, h, "black");
         if (map.background.match(/@[A-z]+\.jpg:[0-9]+/)) {
@@ -2227,6 +2154,7 @@ function drawMap(map, layer2) {
                     font(obj.fontsize),
                     "center"
                 );
+                break;
             case "circ":
                 drawCirc(
                     obj.x1 + cameraOffsets[0],
@@ -2346,7 +2274,6 @@ function sndinit() {
     audiocontext = new AudioContext();
 }
 
-var fixerupper = {};
 var sources = {};
 
 function playByteArray(sndID) {
@@ -2384,7 +2311,7 @@ function valueInRange(val, min, max) {
     return val >= min && val <= max;
 }
 
-var chatFontSize, charsHoriz, charsVert;
+var chatFontSize, charsVert;
 
 chatFontSize = 18;
 
@@ -3143,87 +3070,6 @@ function drawHUD() {
     //#endregion
 }
 
-function forEachInShape(fn, x, y, n_sides, size) {
-    var a = (2 * Math.PI) / n_sides;
-    for (var i = 0; i < n_sides; i++) {
-        fn(x + size * Math.cos(a * i), y + size * Math.sin(a * i), i);
-    }
-}
-
-function getBulletHitWallPos(md) {
-    var mx = md[0];
-    var my = md[1];
-    var px = md[2];
-    var py = md[3];
-    var bullet = {
-        x: 0,
-        y: 0,
-        dx: 0,
-        dy: 0,
-    };
-    var x = mx - px;
-    var y = my - py;
-    var l = Math.sqrt(x * x + y * y);
-    x = x / l;
-    y = y / l;
-    bullet.x = px;
-    bullet.y = py;
-    bullet.dx = x * 20;
-    bullet.dy = y * 20;
-    var hit = null;
-    var done = false;
-    var t = 0;
-    while (!done) {
-        t++;
-        if (t > 500) {
-            done = true;
-        }
-        bullet.x += bullet.dx;
-        bullet.y += bullet.dy;
-        if (!isSafeBulletPos(bullet)) {
-            hit = [bullet.x, bullet.y];
-            done = true;
-        }
-    }
-    return hit;
-}
-
-function isSafeBulletPos(ply) {
-    var ret = true;
-    if (ply.x < -gameState.map.width) ret = false;
-    if (ply.x > gameState.map.width * 2) ret = false;
-    if (ply.y < -gameState.map.height) ret = false;
-    if (ply.y > gameState.map.height * 2) ret = false;
-    gameState.map.colliding.forEach((obj) => {
-        if (!ret || obj.playerclip) return;
-        switch (obj.type) {
-            case "roundrect":
-            case "rect":
-                var rectA = { x: ply.x - 1, y: ply.y - 1, w: 2, h: 2 };
-                var rectB = { x: obj.x1, y: obj.y1, w: obj.x2, h: obj.y2 };
-                var xOverlap =
-                    valueInRange(rectA.x, rectB.x, rectB.x + rectB.w) ||
-                    valueInRange(rectB.x, rectA.x, rectA.x + rectA.w);
-                var yOverlap =
-                    valueInRange(rectA.y, rectB.y, rectB.y + rectB.h) ||
-                    valueInRange(rectB.y, rectA.y, rectA.y + rectA.h);
-                ret = !(yOverlap && xOverlap);
-                break;
-            case "circ":
-                ret = distance(ply.x, ply.y, obj.x1, obj.y1) > obj.r * 3;
-                break;
-        }
-    });
-    return ret;
-}
-
-var navRoute = [];
-
-socketEvent("nav_route", (r) => {
-    navRoute = r;
-    //drawNavData(navData);
-});
-
 await init();
 
 function socketEvent(name, cb) {
@@ -3238,10 +3084,7 @@ socket.onAny((n, d) => {
     evts[n](decomp);
 });
 
-var navDataDrawn = false;
-
-function drawNavData(d) {}
-
+//eslint-disable-next-line no-unused-vars
 var tempNav = "";
 var navIndex = -1;
 var navmode = true;
@@ -3315,7 +3158,6 @@ window.addEventListener("contextmenu", (e) => {
 });
 
 var localPlayerName = socket.id;
-var moveSpeed = 3;
 
 socket.on("connect_error", (data) => {
     console.log("CONNECT ERROR:" + data);
@@ -3329,7 +3171,6 @@ var navData = {};
 
 socketEvent("nav_data", (data) => {
     navData = data;
-    drawNavData(navData);
 });
 
 var storedMem = "0.0KB";
@@ -3337,31 +3178,6 @@ var storedMem = "0.0KB";
 socketEvent("mem", (usageData) => {
     storedMem = Math.round(usageData.heapUsed / 1000) + "KB";
 });
-
-function testNav(txt) {
-    var conns = [];
-    txt.split("\n").forEach((line) => {
-        gameState.map.geo.push({
-            type: "circ",
-            x1: parseInt(line.split(" ")[1]),
-            y1: parseInt(line.split(" ")[2]),
-            r: 4,
-            col: "magenta",
-            thickness: 0,
-            layer2: true,
-        });
-        conns[parseInt(line.split(" ")[0])] = line
-            .split(" ")
-            .slice(2)
-            .map(parseInt);
-    });
-    conns = Object.entries(conns);
-    conns = conns.map((c) => {
-        c[1].unshift(c[0]);
-        return c[1];
-    });
-    conns = conns.map((c) => c.sort());
-}
 
 if (typeof params.get("disablesmoothing") == "string") {
     console.log("disable");
