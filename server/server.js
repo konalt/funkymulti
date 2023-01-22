@@ -3746,9 +3746,22 @@ function doBotAI(bot, botname) {
                 [botname, bot],
                 [closestPlayer.x, closestPlayer.y, bot.x, bot.y]
             );
+            bot.canFire = false;
+            setTimeout(() => {
+                bot.canFire = true;
+            }, getWeaponData(bot.weapon).fireRate);
         }
     }
     bot.a = getAngleArbitrary(closestPlayer.x, closestPlayer.y, bot.x, bot.y);
+    if (bot.isDead && bot.respawnTimer < 0) {
+        bot.hp = 100;
+        bot.hasWater = true;
+        bot.isDead = false;
+        bot.weapon = bot.loadout[1];
+        bot.canFire = true;
+        bot.wepClips = getMaxWepClips();
+        bot.isReloading = false;
+    }
 }
 
 // this is a test !
