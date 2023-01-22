@@ -3637,13 +3637,17 @@ function getAngleArbitrary(x, y, x2, y2) {
 }
 
 function getClosestPlayer(pos) {
+    var ignore_players = opt.bot_ignore_players;
+    var ignore_bots = opt.bot_ignore_bots;
     var cls = { x: -10000, y: -10000 };
-    Object.values(gameState.players).forEach((ply) => {
+    Object.entries(gameState.players).forEach((plydata) => {
+        var ply = plydata[1];
+        if (ignore_players && !plydata[0].startsWith("Bot")) return;
+        if (ignore_bots && plydata[0].startsWith("Bot")) return;
         if (!cls && !ply.isDead && !ply.isSelectingPrimary) return (cls = ply);
         if (
             distance(pos.x, pos.y, ply.x, ply.y) <
                 distance(pos.x, pos.y, cls.x, cls.y) &&
-            distance(pos.x, pos.y, ply.x, ply.y) != 0 &&
             !ply.isDead &&
             !ply.isSelectingPrimary
         )
