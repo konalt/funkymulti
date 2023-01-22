@@ -2685,7 +2685,7 @@ setInterval(() => {
         if (!p) return;
         if (p.hp > 100) p.hp--;
     });
-}, 500);
+}, 1000);
 
 var enableInfiniteAmmoGlitch = false;
 
