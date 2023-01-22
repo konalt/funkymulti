@@ -1356,7 +1356,7 @@ function tick() {
                     r: 20,
                 });
                 var bulletCount = grenade.isSmokeGrenade
-                    ? 50
+                    ? 25
                     : grenade.owner == "VladimirPutin" ||
                       grenade.isThermiteGrenade
                     ? 10
@@ -1751,7 +1751,9 @@ function encodeGrenadeData(grnd) {
 function encodeSmokeData(grnd) {
     var final = "";
     grnd.forEach((g, i) => {
-        final += `${i == 0 ? "" : "\n"}${g.x}:${g.y}:${g.alpha}`;
+        final += `${i == 0 ? "" : "\n"}${Math.floor(g.x)}:${Math.floor(g.y)}:${
+            g.createTime
+        }`;
     });
     return final;
 }
@@ -1759,7 +1761,7 @@ function encodeSmokeData(grnd) {
 function encodeFlameData(grnd) {
     var final = "";
     grnd.forEach((g, i) => {
-        final += `${i == 0 ? "" : "\n"}${g.x}:${g.y}:${g.alpha}`;
+        final += `${i == 0 ? "" : "\n"}${g.x}:${g.y}:${g.createTime}`;
     });
     return final;
 }

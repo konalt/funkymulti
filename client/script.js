@@ -1134,7 +1134,7 @@ function parseSmokeData(buld) {
         final.push({
             x: parseInt(bul[0]),
             y: parseInt(bul[1]),
-            alpha: parseFloat(bul[2]),
+            createTime: parseFloat(bul[2]),
         });
     });
     return final;
@@ -1616,11 +1616,19 @@ function drawGrenade(grn) {
 }
 
 function drawSmokeParticle(grn) {
+    var throwTime = 4000;
+    var maxLifeTime = throwTime + 8000;
+    var fadeTime = 3000;
+    var l =
+        serverTime() - grn.createTime - maxLifeTime > 0
+            ? serverTime() - grn.createTime - maxLifeTime
+            : 0;
+    alpha = Math.abs(l / fadeTime - fadeTime) - fadeTime + 1;
     drawCirc(
         grn.x + cameraOffsets[0],
         grn.y + cameraOffsets[1],
         100,
-        "rgba(200,200,200," + grn.alpha + ")",
+        "rgba(200,200,200," + alpha + ")",
         0
     );
 }
