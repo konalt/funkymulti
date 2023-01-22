@@ -1421,11 +1421,11 @@ function tick() {
                         grenade2.dx =
                             x *
                             (i * 0.1) *
-                            (grenade.isThermiteGrenade ? 0.5 : 1);
+                            (grenade.isThermiteGrenade ? 0.5 : 0.05);
                         grenade2.dy =
                             y *
                             (i * 0.1) *
-                            (grenade.isThermiteGrenade ? 0.5 : 1);
+                            (grenade.isThermiteGrenade ? 0.5 : 0.05);
                         grenade2.createTime = Date.now() + 10000;
                         (grenade.isSmokeGrenade
                             ? gameState.smokeParticles
