@@ -748,6 +748,7 @@ function dealPlyDamage(ply, dmg, hitLoc, notify) {
         scoreboardData.totalKills[notify]++;
         scoreboardData.totalScore[notify]++;
         io.emit("scoreboard", scoreboardData);
+        io.emit("kill", [notify, ply[0]]);
         var n = usernames[notify] ? usernames[notify] : notify;
         switch (killCounts[notify]) {
             case 5:

@@ -2011,6 +2011,8 @@ function setCursorMode(mode, final = false) {
     }
 }
 
+var killfeed = [];
+
 setCursorMode(CursorMode.Default);
 
 var onlyColliding = false;
@@ -2392,6 +2394,17 @@ socket.on("scoreboard", (data) => {
             tmp2.push([ln[0], ln[1]]);
         });
     formattedScoreboard = tmp2;
+});
+
+socket.on("kill", (dat) => {
+    killfeed.push({
+        killer: dat[0],
+        victim: dat[1],
+        time: serverTime(),
+    });
+    if (killfeed.length > 5) {
+        killfeed.shift();
+    }
 });
 
 var gameOver = false;
@@ -2961,6 +2974,49 @@ function drawHUD() {
         });
     }
     if (!ply.isSelectingPrimary) {
+        // killfeed
+        var kf = {
+            x: 15,
+            y: 15,
+            fontsize: 16,
+            padding: 5,
+            margin: 5,
+            radius: 5,
+            bgc: "antiquewhite",
+        };
+        var n = 0;
+        killfeed.forEach((kfObject) => {
+            var killer = kfObject.killer;
+            var victim = kfObject.victim;
+            var time = kfObject.time;
+            var text = `${usernames[killer] || killer} -> ${
+                usernames[victim] || victim
+            }`;
+            ctx.font = font(kf.fontsize);
+            var textWidth = ctx.measureText(text).width;
+            if (serverTime() - time > 10000) return;
+            roundRect(
+                kf.x,
+                kf.y + n * (kf.fontsize + kf.padding * 2 + kf.margin),
+                textWidth + kf.padding * 2,
+                kf.fontsize + kf.padding * 2,
+                kf.radius,
+                kf.bgc
+            );
+            drawText(
+                kf.x + (textWidth + kf.padding * 2) / 2,
+                kf.y +
+                    n * (kf.fontsize + kf.padding * 2 + kf.margin) +
+                    kf.padding +
+                    kf.fontsize * 0.85,
+                text,
+                "black",
+                font(kf.fontsize),
+                "center"
+            );
+            n++;
+        });
+        // chat
         roundRect(
             1633 - 20 - 300,
             20 + 250 + 5,
