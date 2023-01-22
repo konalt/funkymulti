@@ -3636,13 +3636,15 @@ function getAngleArbitrary(x, y, x2, y2) {
 }
 
 function getClosestPlayer(pos) {
-    var cls = null;
+    var cls = { x: -10000, y: -10000 };
     Object.values(gameState.players).forEach((ply) => {
-        if (!cls) return (cls = ply);
+        if (!cls && !ply.isDead && !ply.isSelectingPrimary) return (cls = ply);
         if (
             distance(pos.x, pos.y, ply.x, ply.y) <
                 distance(pos.x, pos.y, cls.x, cls.y) &&
-            distance(pos.x, pos.y, ply.x, ply.y) != 0
+            distance(pos.x, pos.y, ply.x, ply.y) != 0 &&
+            !ply.isDead &&
+            !ply.isSelectingPrimary
         )
             cls = ply;
     });
@@ -3708,7 +3710,13 @@ function doBotAI(bot, botname) {
         bd = botData[botname];
     }
     var closestPlayer = getClosestPlayer(bot);
-    if (!closestPlayer) return;
+    if (
+        !closestPlayer ||
+        !closestPlayer.weapon || // to check if player exists and isnt the empty object defined in getClosestPlayer
+        closestPlayer.isDead ||
+        closestPlayer.isSelectingPrimary
+    )
+        return;
     bd.pathing.final = getClosestWaypoint(closestPlayer);
     if (!bd.pathing.next) {
         var closestWaypoint = getClosestWaypoint(bot);
