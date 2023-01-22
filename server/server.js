@@ -641,7 +641,8 @@ function flamePlayerCheck(flame) {
         var plyname = plydata[0];
         var ply = plydata[1];
 
-        if (plyname == flame.owner) return;
+        if (plyname == flame.owner || ply.isDead || ply.isSelectingPrimary)
+            return;
 
         if (distance(flame.x, flame.y, ply.x, ply.y) < 90) {
             dealPlyDamage(
@@ -1404,7 +1405,7 @@ function tick() {
                             primeTime: Date.now(),
                             life: 0,
                             isMoving: true,
-                            owner: grenade.owner,
+                            owner: "GRENADE_" + grenade.owner,
                         };
                         var x = mx - px;
                         var y = my - py;
