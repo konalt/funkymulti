@@ -3726,156 +3726,153 @@ function getRoutes(source, dest) {
 }
 
 function doBotAI(bot, botname) {
-    if (opt.old_ai) {
-        function botGetClosestPlayer(skipDead) {
-            var ignore_players = opt.bot_ignore_players;
-            var ignore_bots = opt.bot_ignore_bots;
-            var nearest = null;
-            Object.entries(gameState.players).forEach((plydata) => {
-                var ply = plydata[1];
-                if (
-                    ply == bot ||
-                    ((ply.isSelectingPrimary || ply.isDead) && skipDead)
-                )
-                    return;
-                if (ignore_players && !plydata[0].startsWith("Bot")) return;
-                if (ignore_bots && plydata[0].startsWith("Bot")) return;
-                if (!nearest) nearest = plydata;
-                if (
-                    distance(ply.x, ply.y, bot.x, bot.y) <
-                    distance(nearest[1].x, nearest[1].y, bot.x, bot.y)
-                )
-                    nearest = plydata;
-            });
-            return nearest;
-        }
-
-        function getAngleToPos(x, y) {
-            let gameY = bot.y;
-            let gameX = bot.x;
-            let mouseY = y;
-            let mouseX = x;
-            let theta = 0;
-
-            if (mouseX > gameX) {
-                theta =
-                    (Math.atan((gameY - mouseY) / (gameX - mouseX)) * 180) /
-                    Math.PI;
-            } else if (mouseX < gameX) {
-                theta =
-                    180 +
-                    (Math.atan((gameY - mouseY) / (gameX - mouseX)) * 180) /
-                        Math.PI;
-            } else if (mouseX == gameX) {
-                if (mouseY > gameY) {
-                    theta = 90;
-                } else {
-                    theta = 270;
-                }
-            }
-            return Math.round(theta);
-        }
-
-        function botShootBullet(ply, md) {
-            if (!ply) return console.log("[warning] invalid bot shot bullet?");
-            if (!ply.canFire || ply.isDead || ply.isSelectingPrimary) return;
-            ply.lastAttack = Date.now();
-            var res = false;
-            var wep = getWeaponData(ply.weapon);
-            if (!wep.name.startsWith("__melee_"))
-                res = checkShit(md, 30 + wep.barrelLength);
-            var mx = md[0];
-            var my = md[1];
-            var px = md[2];
-            var py = md[3];
-            var x = mx - px;
-            var y = my - py;
-            if (opt.aim_debug) spawnDebugParticle(mx, my, "255,0,0");
-            if (opt.aim_debug) spawnDebugParticle(px, py, "0,0,255");
-            if (res || !ply.canFire) return;
-            ply.lastAttack = Date.now();
-            var l = Math.sqrt(x * x + y * y);
-            x = (x / l) * (30 + wep.barrelLength);
-            y = (y / l) * (30 + wep.barrelLength);
-
-            if (!wep.name.startsWith("__melee_")) {
-                useWeapon(getWeaponData(ply.weapon), [botname, ply], md, [
-                    ply.x + x,
-                    ply.y + y,
-                ]);
-            } else {
-                var m = melee(md, [botname, ply]);
-                ply.lastHand = Math.floor(Math.random() * 2);
-                if (m) dealPlyDamage(m, 20, [m.x, m.y], botname);
-            }
-            ply.canFire = false;
-            ply.wepClips[ply.weapon]--;
-            shootSound(ply.weapon, botname);
-
-            if (ply.wepClips[ply.weapon] == 0) {
-                if (!ply)
-                    return console.log(
-                        "[warning] invalid player attempted reload?"
-                    );
-                if (
-                    ply.isDead ||
-                    ply.wepClips[ply.weapon] ==
-                        getWeaponData(ply.weapon).clipSize
-                )
-                    return;
-                ply.isReloading = true;
-                ply.canFire = false;
-                ply.startedReloadingTime = Date.now();
-                reloadSound(ply.weapon);
-                setTimeout(() => {
-                    ply.isReloading = false;
-                    ply.canFire = true;
-                    ply.wepClips[ply.weapon] = getWeaponData(
-                        ply.weapon
-                    ).clipSize;
-                }, getWeaponData(ply.weapon).reloadTime);
+    function botGetClosestPlayer(skipDead) {
+        var ignore_players = opt.bot_ignore_players;
+        var ignore_bots = opt.bot_ignore_bots;
+        var nearest = null;
+        Object.entries(gameState.players).forEach((plydata) => {
+            var ply = plydata[1];
+            if (
+                ply == bot ||
+                ((ply.isSelectingPrimary || ply.isDead) && skipDead)
+            )
                 return;
+            if (ignore_players && !plydata[0].startsWith("Bot")) return;
+            if (ignore_bots && plydata[0].startsWith("Bot")) return;
+            if (!nearest) nearest = plydata;
+            if (
+                distance(ply.x, ply.y, bot.x, bot.y) <
+                distance(nearest[1].x, nearest[1].y, bot.x, bot.y)
+            )
+                nearest = plydata;
+        });
+        return nearest;
+    }
+
+    function getAngleToPos(x, y) {
+        let gameY = bot.y;
+        let gameX = bot.x;
+        let mouseY = y;
+        let mouseX = x;
+        let theta = 0;
+
+        if (mouseX > gameX) {
+            theta =
+                (Math.atan((gameY - mouseY) / (gameX - mouseX)) * 180) /
+                Math.PI;
+        } else if (mouseX < gameX) {
+            theta =
+                180 +
+                (Math.atan((gameY - mouseY) / (gameX - mouseX)) * 180) /
+                    Math.PI;
+        } else if (mouseX == gameX) {
+            if (mouseY > gameY) {
+                theta = 90;
             } else {
-                setTimeout(() => {
-                    ply.canFire = true;
-                }, getWeaponData(ply.weapon).fireRate);
+                theta = 270;
             }
         }
+        return Math.round(theta);
+    }
 
-        function botGetMoveVector(md) {
-            var mx = md[0];
-            var my = md[1];
-            var px = md[2];
-            var py = md[3];
-            var x = mx - px;
-            var y = my - py;
-            var l = Math.sqrt(x * x + y * y);
-            x = x / l;
-            y = y / l;
-            return [x * 10, y * 10];
-        }
+    function botShootBullet(ply, md) {
+        if (!ply) return console.log("[warning] invalid bot shot bullet?");
+        if (!ply.canFire || ply.isDead || ply.isSelectingPrimary) return;
+        ply.lastAttack = Date.now();
+        var res = false;
+        var wep = getWeaponData(ply.weapon);
+        if (!wep.name.startsWith("__melee_"))
+            res = checkShit(md, 30 + wep.barrelLength);
+        var mx = md[0];
+        var my = md[1];
+        var px = md[2];
+        var py = md[3];
+        var x = mx - px;
+        var y = my - py;
+        if (opt.aim_debug) spawnDebugParticle(mx, my, "255,0,0");
+        if (opt.aim_debug) spawnDebugParticle(px, py, "0,0,255");
+        if (res || !ply.canFire) return;
+        ply.lastAttack = Date.now();
+        var l = Math.sqrt(x * x + y * y);
+        x = (x / l) * (30 + wep.barrelLength);
+        y = (y / l) * (30 + wep.barrelLength);
 
-        function respawn(ply) {
-            var spawn =
-                gameState.map.ents.spawns[
-                    Math.floor(Math.random() * gameState.map.ents.spawns.length)
-                ];
-            if (!spawn) {
-                console.log("[error] no valid spawn points!!!");
-                ply.x = 100;
-                ply.y = 100;
-            } else {
-                ply.x = spawn.x;
-                ply.y = spawn.y;
-            }
-            ply.hp = 100;
-            ply.hasWater = true;
-            ply.isDead = false;
-            ply.weapon = opt.bot_weapon;
-            ply.canFire = true;
-            ply.wepClips = getMaxWepClips();
-            ply.isReloading = false;
+        if (!wep.name.startsWith("__melee_")) {
+            useWeapon(getWeaponData(ply.weapon), [botname, ply], md, [
+                ply.x + x,
+                ply.y + y,
+            ]);
+        } else {
+            var m = melee(md, [botname, ply]);
+            ply.lastHand = Math.floor(Math.random() * 2);
+            if (m) dealPlyDamage(m, 20, [m.x, m.y], botname);
         }
+        ply.canFire = false;
+        ply.wepClips[ply.weapon]--;
+        shootSound(ply.weapon, botname);
+
+        if (ply.wepClips[ply.weapon] == 0) {
+            if (!ply)
+                return console.log(
+                    "[warning] invalid player attempted reload?"
+                );
+            if (
+                ply.isDead ||
+                ply.wepClips[ply.weapon] == getWeaponData(ply.weapon).clipSize
+            )
+                return;
+            ply.isReloading = true;
+            ply.canFire = false;
+            ply.startedReloadingTime = Date.now();
+            reloadSound(ply.weapon);
+            setTimeout(() => {
+                ply.isReloading = false;
+                ply.canFire = true;
+                ply.wepClips[ply.weapon] = getWeaponData(ply.weapon).clipSize;
+            }, getWeaponData(ply.weapon).reloadTime);
+            return;
+        } else {
+            setTimeout(() => {
+                ply.canFire = true;
+            }, getWeaponData(ply.weapon).fireRate);
+        }
+    }
+
+    function botGetMoveVector(md) {
+        var mx = md[0];
+        var my = md[1];
+        var px = md[2];
+        var py = md[3];
+        var x = mx - px;
+        var y = my - py;
+        var l = Math.sqrt(x * x + y * y);
+        x = x / l;
+        y = y / l;
+        return [x * 10, y * 10];
+    }
+
+    function respawn(ply) {
+        var spawn =
+            gameState.map.ents.spawns[
+                Math.floor(Math.random() * gameState.map.ents.spawns.length)
+            ];
+        if (!spawn) {
+            console.log("[error] no valid spawn points!!!");
+            ply.x = 100;
+            ply.y = 100;
+        } else {
+            ply.x = spawn.x;
+            ply.y = spawn.y;
+        }
+        ply.hp = 100;
+        ply.hasWater = true;
+        ply.isDead = false;
+        ply.weapon = opt.bot_weapon;
+        ply.canFire = true;
+        ply.wepClips = getMaxWepClips();
+        ply.isReloading = false;
+    }
+    if (opt.old_ai) {
         var data = botData[botname];
 
         if (!data) {
@@ -4138,16 +4135,16 @@ function doBotAI(bot, botname) {
                 closestPlayer
             );
             if (!hit && bot.canFire) {
-                shootSound(bot.weapon, botname);
-                useWeapon(
-                    getWeaponData(bot.weapon),
-                    [botname, bot],
-                    [closestPlayer.x, closestPlayer.y, bot.x, bot.y]
-                );
-                bot.canFire = false;
-                setTimeout(() => {
-                    bot.canFire = true;
-                }, getWeaponData(bot.weapon).fireRate);
+                botShootBullet(bot, [
+                    closestPlayer.x,
+                    closestPlayer.y,
+                    bot.x,
+                    bot.y,
+                    closestPlayer.x,
+                    closestPlayer.y,
+                    bot.x,
+                    bot.y,
+                ]);
             }
         }
         bot.a = getAngleArbitrary(
