@@ -67,3 +67,15 @@ $c 632 0 23 123 $wall
 -- Bar desk
 $p 1276 22 58 137 $bardesk
 $p 812 97 522 62 $bardesk
+-- Spawnpoints
+spawnpoint 92 92
+spawnpoint 551 76
+spawnpoint 1142 56
+spawnpoint 726 181
+spawnpoint 1513 198
+spawnpoint 1843 93
+spawnpoint 1843 935
+spawnpoint 935 976
+spawnpoint 152 797
+spawnpoint 405 454
+spawnpoint 1121 351
