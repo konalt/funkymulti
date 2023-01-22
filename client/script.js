@@ -2023,13 +2023,10 @@ function shouldDraw(obj) {
         case "strokerect":
         case "roundrect":
         case "strokeroundrect":
+            var lk = gameState.players[ply.lastKiller] || ply;
             var rectA = {
-                x:
-                    (ply.isDead ? gameState.players[ply.lastKiller].x : ply.x) -
-                    1633 / 2,
-                y:
-                    (ply.isDead ? gameState.players[ply.lastKiller].y : ply.y) -
-                    919 / 2,
+                x: (ply.isDead ? lk.x : ply.x) - 1633 / 2,
+                y: (ply.isDead ? lk.y : ply.y) - 919 / 2,
                 w: 1633,
                 h: 919,
             };
