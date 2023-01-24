@@ -9,6 +9,7 @@ glass_break
 grenade_boom
 grenade_pin
 grenade_toss
+hitmark
 laser_reload
 laser_shoot
 m249_reload

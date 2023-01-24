@@ -688,6 +688,8 @@ function dealPlyDamage(ply, dmg, hitLoc, notify) {
         (usernames[ply[0]] ? usernames[ply[0]] : ply[0])
     ); */
     ply[1].hp -= dmg;
+    var sock = io.sockets.sockets.get(notify);
+    emitSOCKET(sock, "sound", "hitmark");
     if (ply[1].hp < 1) {
         gameState.particles.push({
             x: hitLoc[0],
