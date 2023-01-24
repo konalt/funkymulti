@@ -3093,7 +3093,7 @@ function socketEmit(msg, data) {
 socket.onAny((n, d) => {
     if (!d) return evts[n](decomp);
     var decomp = JSON.parse(
-        new TextDecoder().decode(decompressGzip(new Uint8Array(d)))
+        new TextDecoder().decode(decompressGzip(new Uint8Array(d))) || {}
     );
     evts[n](decomp);
 });
